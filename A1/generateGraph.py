@@ -1,14 +1,17 @@
 # (missionaries_left, cannibals_left, missionaries_right, cannibals_right, boatIsOnLeftSide)
+maxMissionaries = 3
+maxCannibals = 3
 
 class State(object):
     missionaries_left = 0
     cannibals_left = 0
     boatIsOnLeftSide = True
 
-    def __init__(self, missionaries_left, cannibals_left, boatIsOnLeftSide):
+    def __init__(self, missionaries_left:int, cannibals_left:int, boatIsOnLeftSide):
         self.missionaries_left = missionaries_left
         self.cannibals_left = cannibals_left
         self.boatIsOnLeftSide = boatIsOnLeftSide
+
 
     def __str__(self):
         return "({},{},{})".format(self.missionaries_left, self.cannibals_left, self.boatIsOnLeftSide)
@@ -55,30 +58,25 @@ def printSolution(actions_sequence):
 
 
 # Make sure a certain action from the current state is feasible
-def feasible(state, missionaries_to_move, cannibals_to_move):
+def feasible(state:State, missionaries_to_move:int, cannibals_to_move:int)->bool:
     if state.boatIsOnLeftSide:
         return missionaries_to_move <= state.missionaries_left and cannibals_to_move <= state.cannibals_left
     return (3 - state.missionaries_left) >= missionaries_to_move and (3 - state.cannibals_left) >= cannibals_to_move
 
-
 # Make sure a feasible action doesn't cause missionaries to be outnumbered by cannibals.
-def legal(state, missionaries_to_move, cannibals_to_move):
+def legal(state:State, missionaries_to_move:int,cannibals_to_move:int) -> bool:
     if state.boatIsOnLeftSide:
-        return (state.missionaries_left - missionaries_to_move >= state.cannibals_left - cannibals_to_move
-                or (state.missionaries_left - missionaries_to_move) == 0) \
-               and (
-               (3 - state.missionaries_left + missionaries_to_move) >= (3 - state.cannibals_left + cannibals_to_move)
-               or (3 - state.missionaries_left + missionaries_to_move == 0))
+        delta = -1
+    else:
+        delta = 1
 
-    return (state.missionaries_left + missionaries_to_move >= state.cannibals_left + cannibals_to_move
-            or (state.missionaries_left + missionaries_to_move) == 0) \
-           and ((3 - state.missionaries_left - missionaries_to_move) >= (3 - state.cannibals_left - cannibals_to_move)
-                or (3 - state.missionaries_left - missionaries_to_move == 0))
+    newMissionaries_left=state.missionaries_left+delta*missionaries_to_move
+    newCannibals_left = state.cannibals_left+delta*cannibals_to_move
+    return (0<=newMissionaries_left<=maxMissionaries and 0<=newCannibals_left<=maxCannibals) and (newMissionaries_left==newCannibals_left or newMissionaries_left==0 or newMissionaries_left==maxMissionaries)
 
 
 def validateAction(state, missionaries_to_move, cannibals_to_move):
-    return feasible(state, missionaries_to_move, cannibals_to_move) and \
-           legal(state, missionaries_to_move, cannibals_to_move)
+    return feasible(state, missionaries_to_move, cannibals_to_move) and legal(state, missionaries_to_move, cannibals_to_move)
 
 
 # generate a new state from (state, action)
@@ -102,15 +100,14 @@ def generateGraph(start_state, end_state):
     frontier = [start_state]
     parent = {}
 
+    print("Found States")
     while len(frontier) > 0:
-
         state = frontier.pop(0)
         # print(state)
-        for act in potential_actions:
-            isValid = validateAction(state, act[0], act[1])
+        for action in potential_actions:
             # print("validateAction({}, {}) == {}".format(state, act, isValid))
-            if (isValid):
-                newState = exploreAction(state, act[0], act[1])
+            if validateAction(state, action[0], action[1]):
+                newState = exploreAction(state, action[0], action[1])
                 if newState in list_of_nodes:
                     if newState in adjacency_matrix[state].keys():
                         # repeat state, and we have been here before from this parent
@@ -127,15 +124,17 @@ def generateGraph(start_state, end_state):
                     adjacency_matrix[state][newState] = {newState}
                     adjacency_matrix[newState] = {}
                     frontier.append(newState)
-                    print("found new state: {} with act: {} from: {}".format(newState, act, state))
+                    print("found new state: {} with act: {} from: {}".format(newState, action, state))
 
+    print("\n")
+    print("Vaild States:")
+    for node in list_of_nodes:
+        print(node)
+
+    print("\n")
+    print("Function ACTION(State):")
     for i in list_of_nodes:
-        print(i, end=" , ")
-
-    print("\n\n")
-
-    for i in list_of_nodes:
-        print("from {}: ".format(i), end="")
+        print("ACTION{} = ".format(i), end="")
         for j in adjacency_matrix[i].keys():
             print(str(adjacency_matrix.get(i).get(j)), end=' , ')
         print()
@@ -144,7 +143,6 @@ def generateGraph(start_state, end_state):
     actions_sequence = extractActions(path)
     printSolution(actions_sequence)
 
-
 start_state = State(3, 3, True)
-end_state = State(0, 0, 0)
+end_state = State(0, 0, False)
 generateGraph(start_state, end_state)
