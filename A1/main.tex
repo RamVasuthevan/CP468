@@ -13,28 +13,71 @@
 
 \section{Problem Formulation}
 
-Let each state be represented by the tuple and enumerated type ($R_M$,$R_C$,$B_M$,$B_C$,$L_M$,$L_C$) BoatLocation. \\
+Let each state be represented by the 3-tuple  ($L_M$,$L_C$, $boatIsOnLeftSide$) . \\
 
-\noindent Let $R_M$ be the number of Missionaries on the right side.\\
-Let $R_C$ be the number of cannibals on the right side.\\
-Let $B_M$ be the number of missionaries on the boat side.\\
-Let $B_C$ be the number of cannibals on the boat side.\\
-Let $L_M$ be the number of missionaries on the left side.\\
-Let $L_C$ be the number of cannibals on the left side.\\
-Let $BoatLocation$ be RIGHT or LEFT.\\
+\noindent 
+Let $M$ be the total number of missionaries.\\
+Let $C$ be the total number of cannibals.\\
+Let $L_M$ be the number of Missionaries on the right side.\\
+Let $L_C$ be the number of cannibals on the right side.\\
+Let $boatIsOnLeftSide$ will be True if the boat is the left and False if the boast is the right
+
+\hfill \break
+\begin{align}
+    \noindent
+    M = 3\\
+    C = 3\\
+    L_M \geq L_C \\
+    (M-L_M) \geq (C-L_C)\\
+\end{align}
 
 \subsection{Initial state}
-    (3,3,0,0,0,0) LEFT \\
-    ie. all of the missionaries and cannibals are on the left side and the boat is on the LEFT side.
-
+    (3,3,True) \\
+    ie. all of the missionaries and cannibals, along with boat will be on the left side.
+    
 \subsection{Actions}
+    
+\verb|  |Function Move($State$, $M_M$, $M_C$)\\
+\verb|      |if $State.boatIsOnLeftSide$:\\
+\verb|          |delta = -1\\
+\verb|      |else:\\
+\verb|          |delta = 1\\
+
+\noindent    
+\verb|      |$State.L_M$ += delta * $M_M$\\
+\verb|      |$State.L_C$ += delta * $M_C$\\
+\verb|      |$State.boatIsOnLeftSide$ = not $State.boatIsOnLeftSide$\\
+\verb|      |return $State$\\
+    
+    
+    
+\noindent    
+One can only move as many missionaries and cannibals as there on the boat's side of the river.\\
+\hfill \break
+\noindent  
+\verb||if $State.boatIsOnLeftSide$:\\
+\verb|  |$M_M$ \in \{ 0, ... ,  $L_M$\}\\
+\verb|  |$M_C$ \in \{ 0, ... ,  $L_C$\}\\
+\verb||else:\\
+\verb|  |$M_M$ \in \{ 0, ... ,  $M-L_M$\}\\
+\verb|  |$M_C$ \in \{ 0, ... ,  $C-L_C$\}\\
+\hfill \break
+    \noindent
+    Move $M_M$ missionaries from the side which to boat is one to the other side.
+    Move $M_C$ cannibals from the side which to boat is one to the other side.\\
+    Move the  boat to the other side.\\
+    
+    
+    
+    
+    
+    
 \subsection{Transition Model}
 \subsection{Goal Test}
-    In the set {(0,0,0,0,3,3) LEFT, (0,0,0,0,3,3) RIGHT}
+    $state \in \{ (0,0, False), (0,0, True),\}\\ $
     ie. all of the missionaries and cannibals are on the right side and the boat is on the RIGHT or the LEFT.
+    
 \subsection{Path Cost}
     The past cost number of times that the boat cross the river.
-
-
-
+    
 \end{document}
