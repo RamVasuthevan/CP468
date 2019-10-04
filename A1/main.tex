@@ -25,10 +25,10 @@ Let $boatIsOnLeftSide$ will be True if the boat is the left and False if the boa
 \hfill \break
 \begin{align}
     \noindent
-    M = 3\\
-    C = 3\\
-    L_M \geq L_C \\
-    (M-L_M) \geq (C-L_C)\\
+    M = 3; C = 3\\
+    $L_M$\geq $L_C$ \verb| | OR \verb| | $L_M$ = 0\\
+    $L_M$ \in \{0, ..., M\}\\
+    $L_C$ \in \{0, ..., C\}\\
 \end{align}
 
 \subsection{Initial state}
@@ -36,6 +36,11 @@ Let $boatIsOnLeftSide$ will be True if the boat is the left and False if the boa
     ie. all of the missionaries and cannibals, along with boat will be on the left side.
     
 \subsection{Actions}
+\hfill \break
+\noindent
+Move $M_M$ missionaries from the side which to boat is one to the other side.
+Move $M_C$ cannibals from the side which to boat is one to the other side.\\
+Move the  boat to the other side.\\
     
 \verb|  |Function Move($State$, $M_M$, $M_C$)\\
 \verb|      |if $State.boatIsOnLeftSide$:\\
@@ -46,10 +51,8 @@ Let $boatIsOnLeftSide$ will be True if the boat is the left and False if the boa
 \noindent    
 \verb|      |$State.L_M$ += delta * $M_M$\\
 \verb|      |$State.L_C$ += delta * $M_C$\\
-\verb|      |$State.boatIsOnLeftSide$ = not $State.boatIsOnLeftSide$\\
+\verb|      |$State.boatIsOnLeftSide$ = NOT $State.boatIsOnLeftSide$\\
 \verb|      |return $State$\\
-    
-    
     
 \noindent    
 One can only move as many missionaries and cannibals as there on the boat's side of the river.\\
@@ -61,14 +64,14 @@ One can only move as many missionaries and cannibals as there on the boat's side
 \verb||else:\\
 \verb|  |$M_M$ \in \{ 0, ... ,  $M-L_M$\}\\
 \verb|  |$M_C$ \in \{ 0, ... ,  $C-L_C$\}\\
-\hfill \break
-    \noindent
-    Move $M_M$ missionaries from the side which to boat is one to the other side.
-    Move $M_C$ cannibals from the side which to boat is one to the other side.\\
-    Move the  boat to the other side.\\
+
     
-    
-    
+
+\verb|  |Function ACTIONS($State$)\\
+\verb|      |if $State.boatIsOnLeftSide$:\\
+\verb|          |return \{ Move(state, \} 
+\verb|      |else:\\
+\verb|          |delta = 1\\
     
     
     
