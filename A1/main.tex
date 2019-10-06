@@ -2,7 +2,7 @@
 \usepackage[utf8]{inputenc}
 
 \title{CP468 A1}
-\author{Ram Vasuthevan}
+\author{Group #3\\ Max Niebergall 160623100,\\ Sriram Vasuthevan 170408710,\\ Justin Harrott 161449800,\\ Rasha Nasri 164161160}
 
 \newpage
 
@@ -18,18 +18,16 @@ Let each state be represented by the 3-tuple  ($L_M$,$L_C$, $boatIsOnLeftSide$) 
 \noindent 
 Let $M$ be the total number of missionaries.\\
 Let $C$ be the total number of cannibals.\\
-Let $L_M$ be the number of Missionaries on the right side.\\
-Let $L_C$ be the number of cannibals on the right side.\\
-Let $boatIsOnLeftSide$ will be True if the boat is the left and False if the boast is the right
+Let $L_M$ be the number of Missionaries on the left side.\\
+Let $L_C$ be the number of cannibals on the left side.\\
+Let $boatIsOnLeftSide$ will be True if the boat is the left and False if the boat is the right
 
 \hfill \break
-\begin{align}
-    \noindent
-    M = 3; C = 3\\
-    $L_M$\geq $L_C$ \verb| | OR \verb| | $L_M$ = 0\\
-    $L_M$ \in \{0, ..., M\}\\
-    $L_C$ \in \{0, ..., C\}\\
-\end{align}
+\noindent
+M = 3; C = 3\\
+$L_M\geq L_C \verb| | OR \verb| | L_M$ = 0\\
+$L_M \in \{0, ..., M\}$\\
+$L_C \in \{0, ..., C\}$\\
 
 \subsection{Initial state}
     (3,3,True) \\
@@ -38,49 +36,85 @@ Let $boatIsOnLeftSide$ will be True if the boat is the left and False if the boa
 \subsection{Actions}
 \hfill \break
 \noindent
-Move $M_M$ missionaries from the side which to boat is one to the other side.
-Move $M_C$ cannibals from the side which to boat is one to the other side.\\
+Each Action does the following:\\
+Move $M_M$ missionaries from the side with to boat is one to the other side.\\
+Move $M_C$ cannibals from the side with to boat is one to the other side.\\
 Move the  boat to the other side.\\
     
-\verb|  |Function Move($State$, $M_M$, $M_C$)\\
+Function Move($State$, $M_M$, $M_C$):\\
 \verb|      |if $State.boatIsOnLeftSide$:\\
 \verb|          |delta = -1\\
 \verb|      |else:\\
 \verb|          |delta = 1\\
 
 \noindent    
-\verb|      |$State.L_M$ += delta * $M_M$\\
-\verb|      |$State.L_C$ += delta * $M_C$\\
-\verb|      |$State.boatIsOnLeftSide$ = NOT $State.boatIsOnLeftSide$\\
-\verb|      |return $State$\\
+\verb|      |$newL_M = State.L_M$ + delta * $M_M$\\
+\verb|      |$newL_C = State.L_C$ + delta * $M_C$\\
+\verb|      |$newBoatIsOnLeftSide$ = NOT $State.boatIsOnLeftSide$\\
+
+\verb|      |return $State(newL_M, newL_C, newBoatIsOnLeftSide)$\\
     
 \noindent    
-One can only move as many missionaries and cannibals as there on the boat's side of the river.\\
+One can only move as many missionaries or cannibals as there on the boat's side of the river, and we also require that an action does not cause there to be more Cannibals than Missionaries on either side after the action completes.\\
 \hfill \break
-\noindent  
-\verb||if $State.boatIsOnLeftSide$:\\
-\verb|  |$M_M$ \in \{ 0, ... ,  $L_M$\}\\
-\verb|  |$M_C$ \in \{ 0, ... ,  $L_C$\}\\
-\verb||else:\\
-\verb|  |$M_M$ \in \{ 0, ... ,  $M-L_M$\}\\
-\verb|  |$M_C$ \in \{ 0, ... ,  $C-L_C$\}\\
+\noindent
 
-    
+Make sure a feasible action doesn't cause missionaries to be outnumbered by cannibals.\\
+\verb|| Function legal($state$,$M_M$,$M_C$):\\
+\verb|      | if $state.boatIsOnLeftSide$:\\
+\verb|          | delta = -1\\
+\verb|      | else:\\
+\verb|          |delta = 1\\\\
+\verb|      | $newM_L=state.M_L + delta*M_M$\\
+\verb|      | $newC_L= state.C_L + delta*M_C$\\\\
+\verb|      | $isLegal$ = $newM_L == newC_L$ or $newM_L == 0$ or $newM_L == M$\\
+\verb|      | $isLegal$ = $isLegal$ and $0 \leq newM_L \leq M$ and $0 \leq newC_L \leq C$\\\\
+\verb|      |return  $isLegal$\\
 
-\verb|  |Function ACTIONS($State$)\\
-\verb|      |if $State.boatIsOnLeftSide$:\\
-\verb|          |return \{ Move(state, \} 
+
+Make sure a certain action from the current state is feasible\\
+\verb|| Function feasible($state$,$M_M$, $M_C$): \\
+\verb|      |if ($state.boatIsOnLeftSide$ and $M_M \in \{ 0, ... ,  state.L_M\}$ and $M_C \in \{ 0, ... ,  state.L_C\}$):\\
+\verb|          | return True\\
+\verb|      |else if($M_M \in \{ 0, ... ,  M-state.L_M\}$ and $M_C \in \{ 0, ... ,  C-state.L_C\}$):\\
+\verb|          | return True\\
 \verb|      |else:\\
-\verb|          |delta = 1\\
-    
+\verb|          | return False\\
+
+
+
+\verb||Function VALIDATE($state$, $M_M$, $C_M$):\\
+\verb|      |return feasible($state$, $M_M$, $C_M$) and legal($state$, $M_M$, $C_M$)\\\\
+
+
+
+To get the set of actions, we consider all combinations of $M_M$ and $M_C$: (2, 0), (0, 2), (1, 1), (1, 0), (0, 1)\\
+We validate each potential action, and the set/list of actions that are valid is returned by the ACTIONS function.\\\\
+\verb||Function ACTIONS($State$):\\
+\verb|      |$potentialMoves$ = [(2, 0), (0, 2), (1, 1), (1, 0), (0, 1)]\\
+\verb|      |$validMoves$ = List()\\
+\verb|      |for $movement$ in $potentialMoves$:\\
+\verb|        |if(VALIDATE($State$, $movement$[0], $movement$[1])):\\
+\verb|            |$validMoves$.append($movement$)\\
+\verb|      |return $validMoves$\\
+
     
     
 \subsection{Transition Model}
+Each (state, valid action) pair can result in a new state by applying the RESULT function below:\\
+
+\verb|| Function RESULT($state$, $M_M$, $M_C$):\\
+\verb|      | if $state$.$boatIsOnLeftSide$:\\
+\verb|          | return State($state$.$L_M - M_M$, $state$.$L_C - M_C$, $not state$.$boatIsOnLeftSide$)\\
+\verb|      | else:\\
+\verb|          |return State($state$.$L_M + M_M$, $state$.$L_C + M_C$, $not state$.$boatIsOnLeftSide$)\\
+
 \subsection{Goal Test}
-    $state \in \{ (0,0, False), (0,0, True),\}\\ $
-    ie. all of the missionaries and cannibals are on the right side and the boat is on the RIGHT or the LEFT.
+\verb|| Function GoalTest($state$):\\
+\verb|      | return $state \in \{ (0,0, False), (0,0, True)\}\\ $\\
+    ie. all of the missionaries and cannibals are on the right side and the boat is on the RIGHT or the LEFT. However, only the state where the boat is on the right side is reachable.
     
 \subsection{Path Cost}
-    The past cost number of times that the boat cross the river.
+    The past cost is the number of times that the boat crosses the river. Ie. the sum of crossed edges, all with weights of 1.
     
 \end{document}
