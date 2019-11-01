@@ -11,7 +11,7 @@ def print_formated_board(board):
 # load_file() loads sudoku.csv which contains sudoku game boards with solutions
 # returns ndarray of shape (9,9) dtype = np.int8
 def load_file():
-    fv = open("A2\sudoku.csv")
+    fv = open(r"A2\sudoku.csv")
     title = fv.readline()
 
     first_sudoku_and_solution = fv.readline()
@@ -25,3 +25,8 @@ def load_file():
 
     return sudoku_board
 
+
+fv = open("A2\sudoku.csv")
+wfv = open("A2\sudoku_small.csv", "w")
+for i in range(100):
+    wfv.write(fv.readline())
