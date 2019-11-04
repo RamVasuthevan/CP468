@@ -30,3 +30,5 @@ fv = open("A2\sudoku.csv")
 wfv = open("A2\sudoku_small.csv", "w")
 for i in range(100):
     wfv.write(fv.readline())
+
+# adding new line
