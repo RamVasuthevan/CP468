@@ -111,8 +111,7 @@ def validSolve(pre: "np.ndarray[np.int8]", post: "np.ndarray[np.int8]"):
 def solved(domains: Dict[Tuple[int, int], Set[int]])-> bool:
     return all(map(lambda x:len(x)==1, domains.values()))
 
-# def load_file(path: str = r"A2\sudoku_small.csv", n: int = 1) -> List["np.ndarray[np.int8]"]:
-def load_file(path: str = r"sudoku_small.csv", n: int = 1) -> List["np.ndarray[np.int8]"]:
+def load_file(path: str = r"A2\sudoku_small.csv", n: int = 1) -> List["np.ndarray[np.int8]"]:
     """
     Reads file at path and constructs board
 
