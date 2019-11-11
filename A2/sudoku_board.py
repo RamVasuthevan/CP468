@@ -1,6 +1,6 @@
 import numpy as np
 
-from typing import List, Tuple, Set, Dict
+from typing import List, Tuple, Set, Dict, Union
 from collections import deque
 from itertools import chain
 from copy import deepcopy
@@ -9,10 +9,10 @@ EMPTY_ENTRY = 0
 CHAR_WIDTH_OF_BOARD = 21
 SIZE_OF_BOARD = 9
 BLOCK_SIZE = SIZE_OF_BOARD // 3
-ALL_CELLS = [(i, j) for i in range(9) for j in range(SIZE_OF_BOARD)] #todo is range 9 supposed to be SIZE_O_B
+ALL_CELLS = [(i, j) for i in range(SIZE_OF_BOARD) for j in range(SIZE_OF_BOARD)]
 
 
-def pretty_print_board(board: "np.ndarray[np.int8]", empty_value: str = " ") -> None: #todo can EMPTY_VAL = " " be a constant
+def pretty_print_board(board: "np.ndarray[np.int8]", empty_value: str = " ") -> None:
     """
     Takes a in a board and pretty prints it
 
@@ -22,7 +22,7 @@ def pretty_print_board(board: "np.ndarray[np.int8]", empty_value: str = " ") -> 
     Print:
         board with empty_value if the cell is empty
     """
-    
+
     print("-"*CHAR_WIDTH_OF_BOARD)
     for row in range(SIZE_OF_BOARD):
         print("|", end="")
@@ -60,10 +60,10 @@ def domains2Board(domains: Dict[Tuple[int, int], Set[int]]) -> "np.ndarray[np.in
     # convert dictionary to ndarray
     return np.reshape(np.asarray(list(map(lambda x: domains[x[0]],
                                           sorted(list(domains.items())))), np.int8),
-                                          (-1, SIZE_OF_BOARD))
+                      (-1, SIZE_OF_BOARD))
 
 
-def validSolve(pre: "np.ndarray[np.int8]", post: "np.ndarray[np.int8]"):
+def validSolve(pre: "np.ndarray[np.int8]", post: "np.ndarray[np.int8]") -> bool:
     """
     Takes in a board before and after an algorithm has been applied and checks if the board 
     is still an valid sudoku. Assumes that the pre algo board was valid.
@@ -72,7 +72,7 @@ def validSolve(pre: "np.ndarray[np.int8]", post: "np.ndarray[np.int8]"):
         pre: board before change
         post: board with new cell value for testing
     Returns:
-            True if new value is valid, else False
+            True if new boards are valid, else False
     """
     # Check if there are duplicates or invalid characters in each row
     for row in post:
@@ -108,8 +108,44 @@ def validSolve(pre: "np.ndarray[np.int8]", post: "np.ndarray[np.int8]"):
     # Check if any of filled cells in pre are changed
     return np.all(np.any((pre == post, pre == np.zeros((SIZE_OF_BOARD, SIZE_OF_BOARD))), axis=0))
 
-def solved(domains: Dict[Tuple[int, int], Set[int]])-> bool:
-    return all(map(lambda x:len(x)==1, domains.values()))
+
+def vaildDomains(domains: Dict[Tuple[int, int], Set[int]]) -> bool:
+    """
+    Takes in a board before and after an algorithm has been applied and checks if the board 
+    is still an valid sudoku. Assumes that the pre algo board was valid.
+
+    Takes in domains and checks if it's valid domain 
+    Args:
+        domains: A dictionary with key: ALL_CELLS val: domain set of cell
+    Returns:
+            True if new boards are valid, else False
+    """
+    # Check if any cell has domain length 0
+    if any(map(lambda x: not len(x), domains.values())):
+        return False
+
+    # Check if the constraining cells of any cell (with domain length one) has the same value
+    for cell in ALL_CELLS:
+        if len(
+            domains[cell]) == 1 and any(
+            map(lambda x: domains[x] == set(domains[cell]),
+                constrained_variables(cell))):
+            return False
+
+    return True
+
+
+def solved(domains: Dict[Tuple[int, int], Set[int]]) -> bool:
+    """
+    Takes in a domain and checks if the board has been solved
+
+    Args:
+        domains: A dictionary with key: ALL_CELLS val: domain set of cell
+    Returns:
+            True if board was been solved, else False
+    """
+    return all(map(lambda x: len(x) == 1, domains.values()))
+
 
 def load_file(path: str = r"A2\sudoku_small.csv", n: int = 1) -> List["np.ndarray[np.int8]"]:
     """
@@ -134,7 +170,7 @@ def load_file(path: str = r"A2\sudoku_small.csv", n: int = 1) -> List["np.ndarra
     return boards
 
 
-def constrained_variables(coord: Tuple[int, int]) -> List[Tuple[int, int]]:
+def constrained_variables(coord: Tuple[int, int]) -> Set[Tuple[int, int]]:
     """
     When given coordinates for a cell, returns all of the coordinates of cells which constrain that cell
 
@@ -160,18 +196,18 @@ def create_constraint_set() -> Set[Tuple[Tuple[int, int], Tuple[int, int]]]:
     """
     Generates initialized constraint_set for blank sudoku board. A cell's value can not be same as the 
     value of any cell in it's row, column or block.
-    
+
     Returns:
         constraints: a set of constraints. A constraint is a 2-tuple of cell coords. Constraint (Xi,Xj) implies that Xi != Xj.
     """
-    return list(chain(*map(lambda cell: [(cell, diff) for diff in constrained_variables(cell)], ALL_CELLS)))
+    return set(chain(*map(lambda cell: {(cell, diff) for diff in constrained_variables(cell)}, ALL_CELLS)))
 
 
 def create_domain_set(board: "np.ndarray[np.int8]") -> Dict[Tuple[int, int], Set[int]]:
     """
     Generates a domains from a board. If cell has a set value, it's domain is just that value, 
     else the domain is all integers from 1 to 9 inclusive.
-    
+
     Args:
         board: a board with either a value for each cell or 0 if it has no value
     Returns:
@@ -182,11 +218,10 @@ def create_domain_set(board: "np.ndarray[np.int8]") -> Dict[Tuple[int, int], Set
 
 def AC3(constraints: Set[Tuple[int, int]],
         domains: Dict[Tuple[int, int],
-                      Set[int]]) -> Dict[Tuple[int, int],
-                                         Set[int]]:
+                      Set[int]], returnQueueLength = False) -> Union[Union[Dict[Tuple[int, int],Set[int]], bool],Tuple[Union[Dict[Tuple[int, int],Set[int]], bool],List[int]]]:
     """
     Takes in a Constraint Satisfaction Problem (CSP) and makes it arc-constraint 
-    
+
     Args:
         constraints: a set of all relationship between variables. Constraint (x,y) => x != y
         domains: a dictionary with key: ALL_CELLS val: domain set of cell
@@ -194,15 +229,20 @@ def AC3(constraints: Set[Tuple[int, int]],
         domains: A dictionary with key: ALL_CELLS val: domain set of cell
     """
     queue = deque(constraints)
-
+    qlen = []
     while queue:
+        qlen.append(len(queue))
         Xi, Xj = queue.popleft()
         revised, domains = revise(Xi, Xj, domains)
         if revised:
             if not domains[Xi]:
                 return False
             queue.extend(set((Xk, Xi) for Xk in constrained_variables(Xi)))
-    return domains
+
+    if returnQueueLength:
+        return domains, qlen
+    else:
+        return domains
 
 
 def revise(Xi: Tuple[int, int],
@@ -212,7 +252,7 @@ def revise(Xi: Tuple[int, int],
                                                         Set[int]]]:
     """
     Takes in an arc and makes it arc consistent
-    
+
     Args:
         Xi: variable's whose domain is to be adjusted
         Xj: variables's whose being checked against Xi
@@ -230,34 +270,38 @@ def revise(Xi: Tuple[int, int],
     domains[Xi] -= removed
     return revised, domains
 
+def select_unassigned_variable(domains: Dict[Tuple[int, int],
+                      Set[int]])-> Tuple[int,int]:
+    """
+    Takes in domains and selects the domain with lowest number of options which hasn't be assigned  
+    Args:
+        domains: a dictionary with key: ALL_CELLS val: domain set of cell
+    Returns:
+        The coord of the domain with lowest number of options which hasn't be assigned  
+    """
+    return min(filter(lambda cell: len(domains[cell])>1,domains.keys()), key = lambda cell: len(domains[cell]))
+
 
 def backtracking_search(
-        constraints: Set[Tuple[int, int]],
         domains: Dict[Tuple[int, int],
                       Set[int]]):
-    '''
+    """
     Takes in a sudoku Constraint Satisfaction Problem (CSP) and searches solution using backtracking, 
     starting from the last arc-consistent step of an unsuccessful AC-3 attempt.
-    
+
     Args:
         constraints: a set of all relationship between variables. Constraint (x,y) => x != y
         domains: a dictionary with key: ALL_CELLS val: domain set of cell
     Returns:
         A solution to the board, else False.
-        '''
-    board = domains2Board(domains)
-     
-    return backtracking_search_aux((0,0), constraints, domains, board)
+    """
+    return backtracking_search_aux(select_unassigned_variable(domains), domains)
 
-def backtracking_search_aux(
-        currCell: Tuple[int, int],
-        constraints: Set[Tuple[int, int]],
-        domains: Dict[Tuple[int, int],
-                      Set[int]],
-        board: "np.ndarray[np.int8]"):
-    '''
+
+def backtracking_search_aux(currCell: Tuple[int, int], domains: Dict[Tuple[int, int], Set[int]]):
+    """
     Recursive auxilary assist for  backtracking_search
-    
+
     Args:
         currCell: a tuple containing coordinates of current cell we're working with
         constraints: a set of all relationship between variables. Constraint (x,y) => x != y
@@ -265,35 +309,20 @@ def backtracking_search_aux(
        board: array containing board values. If there are multiple values in the domain of a cell, value is 0.
     Returns:
         A solution domain as board, else False.
-        '''
-    row = int(currCell[0])
-    col = int(currCell[1])
-#     print(row, col)
-    
-    #if in last column move first col and increment row    
-    if col == SIZE_OF_BOARD:
-        col = 0
-        row += 1
-     
-        if row == SIZE_OF_BOARD:
-            return board
-  
-    # Skip entries already filled out. They already have a value in them.
-    domain = domains[(row, col)]
-    if len(domain) == 1:
-        return backtracking_search_aux((row, col + 1), constraints, domains, board)
-    
-    #else test new values
-    for testVal in domain:
-#         print(row, col, testVal)
-        newBoard = deepcopy(board)
-        newBoard[row][col] = testVal
+    """
+    if solved(domains):
+        return domains
+
+    for testVal in domains[currCell]:
+        newDomains = deepcopy(domains)
+        newDomains[currCell] = set([testVal])
         
-        if validSolve(board, newBoard):
-            btracked = backtracking_search_aux((row, col + 1), constraints, domains, newBoard)
-            if type(btracked) == np.ndarray:
-                return btracked
+        for cell in constrained_variables(currCell):
+            newDomains[cell] -= set([testVal])
         
-        board[row][col] = EMPTY_ENTRY;
-    
-    return False
+        if vaildDomains(newDomains):
+            ret = backtracking_search_aux(select_unassigned_variable(domains), newDomains)
+            if ret:
+                return ret
+    else:
+        return False

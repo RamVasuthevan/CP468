@@ -1,97 +1,149 @@
 import sudoku_board
 import numpy as np
+import matplotlib.pyplot as plt
+from typing import Tuple, Set, Dict
 
 
-def testBoard(n: int = 1):
+def PrepBoard(path: str = r"A2\sudoku_small.csv", n: int = 1) -> Tuple["np.ndarray[np.int8]",
+                                                                       Set[Tuple[Tuple[int, int],
+                                                                                 Tuple[int, int]]],
+                                                                       Dict[Tuple[int, int],
+                                                                            Set[int]]]:
     """
-    Takes in a number n. Prints the nth board, the post AC-3 domain set and the post AC-3 board
+    Loads the nth board, generrates the constraints and domains
 
     Args:
         board: Board to be printed
         empty_value: Values to be printed if cell is empty
     Print:
-        nth
+        NO_SOL => There is no solution
+        FAIL => There is a implementation error
+        SOLVED => The board has been fully solved
+        PARTIAL_SOLVE => The board has been partial solved
     """
-    board = sudoku_board.load_file(n=n)[n-1]
-    print("Sudoku Board Initialized:")
-    sudoku_board.pretty_print_board(board)
-    print()
-
+    board = sudoku_board.load_file(path=path, n=n)[-1]
     constraints = sudoku_board.create_constraint_set()
     domains = sudoku_board.create_domain_set(board)
+    return board, constraints, domains
 
-    ret = sudoku_board.AC3( constraints, domains)
 
-    if not ret:
-        print("AC-3 has identified that there is no solution")
-
-    else:
-        if not sudoku_board.validSolve(board, sudoku_board.domains2Board(ret)):
-            print("THIS IS NOT A VAILD SOLUTION (AC-3 was not implemented correctly)")
-
-        else:
-            print(f"SOLVED = {sudoku_board.solved(ret)}")
-#             for key, val in ret.items():
-#                 print(f"{key} : {val}")
-                
-        
-        print("Last found arc consistency")
-        sudoku_board.pretty_print_domain(ret)
-        print()
-
-def find_partial_solution():
+def testBoard(n: int = 1) -> None:
     """
-    Find the first Sudoku can't be fully solved by AC-3. Prints the domains and board
+    Prints the nth board, applies AC-3 to nth board, prints the board and 
 
     Args:
+        board: Board to be printed
+        empty_value: Values to be printed if cell is empty
     Print:
-        Prints the domains and board
+        NO_SOL => There is no solution
+        FAIL => There is a implementation error
+        SOLVED => The board has been fully solved
+        PARTIAL_SOLVE => The board has been partial solved
     """
-    BOARDS_TO_CHECK = 900
-    failed = 0
-    btSolved = 0
-    
-    
-    
-    boards = sudoku_board.load_file(n=BOARDS_TO_CHECK)
+    pre, constraints, domains = PrepBoard(n)
+    post_Domains = sudoku_board.AC3(constraints, domains)
+
+    print(f"Sudoku Board #{n}")
+    sudoku_board.pretty_print_board(pre)
+
+    if not post_Domains:
+        print("NO_SOL: AC-3 has identified board #{n} has no solution")
+    elif not sudoku_board.validSolve(pre, sudoku_board.domains2Board(post_Domains)):
+        print("FAIL: AC-3 has been implemented incorrectly")
+        for key, val in post_Domains.items():
+            print(f"{key} | {val}")
+    elif sudoku_board.solved(post_Domains):
+        print("SOLVED: AC-3 has fully solved the board")
+        sudoku_board.pretty_print_board(sudoku_board.domains2Board(post_Domains))
+    else:
+        print("PARTIAL_SOLVE: AC-3 has partially solved the board")
+
+        for key, val in post_Domains.items():
+            print(f"{key} | {val}")
+
+        post_Domains = sudoku_board.backtracking_search(post_Domains)
+
+        if not post_Domains:
+            print("NO_SOL: BackTrack has identified board #{n} has no solution")
+        elif not sudoku_board.validSolve(pre, sudoku_board.domains2Board(post_Domains)):
+            print("FAIL: BackTrack has been implemented incorrectly")
+            for key, val in post_Domains.items():
+                print(f"{key} | {val}")
+        elif sudoku_board.solved(post_Domains):
+            print("SOLVED: BackTrack has fully solved the board")
+            sudoku_board.pretty_print_board(sudoku_board.domains2Board(post_Domains))
+        else:
+            print("NO_SOL: BackTrack has partially solved the board")
+
+
+def solve(pre: "np.ndarray[np.int8]")-> None:
+    """
+    Takes in a board and tries to solve it using AC-3 and BackTracking
+
+    Args:
+        board: Board to be printed
+    Print:
+        Prints out the solved board or which algorithm failed and the domain set of the failed board
+    """
+
     constraints = sudoku_board.create_constraint_set()
-    ret = sudoku_board.AC3( constraints, sudoku_board.create_domain_set(boards.pop(0)))
-    boardChecked = 1
-    
-    while boards:
-        ret = sudoku_board.AC3( constraints, sudoku_board.create_domain_set(boards.pop(0)))
-        boardChecked += 1
+    domains = sudoku_board.create_domain_set(pre)
 
-        if not sudoku_board.solved(ret):
-            print(f"\nSudoku board {boardChecked} was unable to be solved by AC-3 algorithm")
-            
-            board = sudoku_board.load_file(n=boardChecked)[boardChecked-1]
-            print(f"\nSudoku Board {boardChecked} initial values:")
-            sudoku_board.pretty_print_board(board)
-            
-            print(f"\nLast found arc consistency for board {boardChecked}:")
-            sudoku_board.pretty_print_domain(ret)
-            
-#             print(f"\nLast found cell domains for board {boardChecked}:")
-#             for key, val in ret.items():
-#                 print(f"{key} : {val}")
-                
-            print(f"\nAttempting to solve board {boardChecked} with backtracking")
-            btracked = sudoku_board.backtracking_search(constraints, ret)
-            
-            if type(btracked) == np.ndarray:
-                print(f"\nSolution to board {boardChecked} was found using backtracking: ")
-                btSolved += 1
-                sudoku_board.pretty_print_board(btracked)
-            else:
-                print(f"\nbacktracking board {boardChecked} failed\ncontinuing with other boards")
-                failed += 1
-                
-                    
-    print(f'''\nTried to find a partial solution amongst {BOARDS_TO_CHECK}
-        {failed} failed
-        {btSolved} were solved using backtracking
-        {boardChecked - btSolved - failed} were solved using AC-3''')
+    post_Domains = sudoku_board.AC3(constraints, domains)
 
-#testBoard(100)
-find_partial_solution()
+    if not post_Domains:
+        print("Board is not vaild")
+        return False
+    elif sudoku_board.solved(post_Domains):
+        sudoku_board.pretty_print_domain(post_Domains)
+        return True
+    elif not sudoku_board.vaildDomains(post_Domains):
+        print("AC-3 has created an invaild board")
+        for key, val in post_Domains:
+            print(f"{key} | {val}")
+        raise ValueError("AC-3 has created an invaild board")
+    else:
+        post_Domains = sudoku_board.backtracking_search(domains)
+        if not post_Domains:
+            print("Board is not vaild")
+            return False
+        elif not sudoku_board.solved(post_Domains):
+            print("Backtracking has not solved the board")
+            for key, val in post_Domains:
+                print(f"{key} | {val}")
+            raise ValueError("Backtracking has not solved the board")
+        elif not sudoku_board.vaildDomains(post_Domains):
+            print("AC-3 has created an invaild board")
+            for key, val in post_Domains:
+                print(f"{key} | {val}")
+            raise ValueError("AC-3 has created an invaild board")
+        else:
+            sudoku_board.pretty_print_domain(post_Domains)
+
+
+def solve_with_length(pre: "np.ndarray[np.int8]"):
+    """
+    Takes in a board and tries to solve it using AC-3 and BackTracking, and displays the graph showing length of AC-3's queue 
+
+    Args:
+        board: Board to be printed
+    Print:
+        Prints out the solved board or which algorithm failed and the domain set of the failed board
+    """
+    constraints = sudoku_board.create_constraint_set()
+    domains = sudoku_board.create_domain_set(pre)
+    post_Domains, qlen = sudoku_board.AC3(constraints, domains, True)
+
+    if not post_Domains:
+        print("Board is invalid")
+        post_Domains = sudoku_board.backtracking_search(post_Domains)
+        if not post_Domains:
+            print("Board is invalid")
+        else:
+            sudoku_board.pretty_print_domain(post_Domains)
+    plt.plot(qlen)
+    plt.show()
+
+solve_with_length(sudoku_board.load_file(path =r"A2\sudoku_small.csv",n=1)[-1])
+
+
