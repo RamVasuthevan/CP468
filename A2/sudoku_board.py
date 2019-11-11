@@ -109,7 +109,7 @@ def validSolve(pre: "np.ndarray[np.int8]", post: "np.ndarray[np.int8]") -> bool:
     return np.all(np.any((pre == post, pre == np.zeros((SIZE_OF_BOARD, SIZE_OF_BOARD))), axis=0))
 
 
-def vaildDomains(domains: Dict[Tuple[int, int], Set[int]]) -> bool:
+def validDomains(domains: Dict[Tuple[int, int], Set[int]]) -> bool:
     """
     Takes in a board before and after an algorithm has been applied and checks if the board 
     is still an valid sudoku. Assumes that the pre algo board was valid.
@@ -183,7 +183,7 @@ def constrained_variables(coord: Tuple[int, int]) -> Set[Tuple[int, int]]:
 
     Returns:
         A list of coordinates, which act as constraints for the coord cell, 
-        i.e. coords all of the cells in the same row, column and block of the given cell coord
+        i.e. the coordinates of all of the cells in the same row, column, or block as the given cell coord
     """
     x_coord = coord[0]
     y_coord = coord[1]
@@ -229,8 +229,10 @@ def AC3(constraints: Set[Tuple[int, int]],
     Args:
         constraints: a set of all relationship between variables. Constraint (x,y) => x != y
         domains: a dictionary with key: ALL_CELLS val: domain set of cell
+        returnQueueLength: if true, this function returns a list of the length of the queue at each step
     Returns:
         domains: A dictionary with key: ALL_CELLS val: domain set of cell
+        queue_lengths: a list of the length of the queue at each step (if returnQueueLength == True)
     """
     queue = deque(constraints)
     qlen = []
@@ -324,7 +326,7 @@ def backtracking_search_aux(currCell: Tuple[int, int], domains: Dict[Tuple[int, 
         for cell in constrained_variables(currCell):
             newDomains[cell] -= set([testVal])
         
-        if vaildDomains(newDomains):
+        if validDomains(newDomains):
             ret = backtracking_search_aux(select_unassigned_variable(domains), newDomains)
             if ret:
                 return ret

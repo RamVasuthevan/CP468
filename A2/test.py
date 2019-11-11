@@ -76,7 +76,7 @@ def testBoard(n: int = 1) -> None:
             print("NO_SOL: BackTrack has partially solved the board")
 
 
-def solve(pre: "np.ndarray[np.int8]")-> None:
+def solve(pre: "np.ndarray[np.int8]")-> bool:
     """
     Takes in a board and tries to solve it using AC-3 and BackTracking
 
@@ -89,20 +89,27 @@ def solve(pre: "np.ndarray[np.int8]")-> None:
     constraints = sudoku_board.create_constraint_set()
     domains = sudoku_board.create_domain_set(pre)
 
-    post_Domains = sudoku_board.AC3(constraints, domains)
+    post_Domains, qlen = sudoku_board.AC3(constraints, domains, True)
+
+    plt.plot(qlen)
+    plt.xlabel("Step #")
+    plt.ylabel("Queue Length")
+    plt.savefig("queue_length")
 
     if not post_Domains:
         print("Board is not vaild")
         return False
     elif sudoku_board.solved(post_Domains):
+        print("Board solved with AC3")
         sudoku_board.pretty_print_domain(post_Domains)
         return True
-    elif not sudoku_board.vaildDomains(post_Domains):
+    elif not sudoku_board.validDomains(post_Domains):
         print("AC-3 has created an invaild board")
         for key, val in post_Domains:
             print(f"{key} | {val}")
         raise ValueError("AC-3 has created an invaild board")
     else:
+        print("AC-3 did not solve the board. Attepting to solve with backtracking...")
         post_Domains = sudoku_board.backtracking_search(domains)
         if not post_Domains:
             print("Board is not vaild")
@@ -112,38 +119,17 @@ def solve(pre: "np.ndarray[np.int8]")-> None:
             for key, val in post_Domains:
                 print(f"{key} | {val}")
             raise ValueError("Backtracking has not solved the board")
-        elif not sudoku_board.vaildDomains(post_Domains):
+        elif not sudoku_board.validDomains(post_Domains):
             print("AC-3 has created an invaild board")
             for key, val in post_Domains:
                 print(f"{key} | {val}")
             raise ValueError("AC-3 has created an invaild board")
         else:
+            print("Solved with backtracking:")
             sudoku_board.pretty_print_domain(post_Domains)
 
 
-def solve_with_length(pre: "np.ndarray[np.int8]"):
-    """
-    Takes in a board and tries to solve it using AC-3 and BackTracking, and displays the graph showing length of AC-3's queue 
+#solve(sudoku_board.load_file(path =r"A2\sudoku_small.csv",n=1)[-1])
 
-    Args:
-        board: Board to be printed
-    Print:
-        Prints out the solved board or which algorithm failed and the domain set of the failed board
-    """
-    constraints = sudoku_board.create_constraint_set()
-    domains = sudoku_board.create_domain_set(pre)
-    post_Domains, qlen = sudoku_board.AC3(constraints, domains, True)
-
-    if not post_Domains:
-        print("Board is invalid")
-        post_Domains = sudoku_board.backtracking_search(post_Domains)
-        if not post_Domains:
-            print("Board is invalid")
-        else:
-            sudoku_board.pretty_print_domain(post_Domains)
-    plt.plot(qlen)
-    plt.show()
-
-solve_with_length(sudoku_board.load_file(path =r"A2\sudoku_small.csv",n=1)[-1])
-
-
+for i in range(98,102):
+    solve(sudoku_board.load_file(path =r"A2\sudoku_small.csv",n=i)[-1])
