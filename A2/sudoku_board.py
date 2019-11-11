@@ -164,7 +164,11 @@ def load_file(path: str = r"A2\sudoku_small.csv", n: int = 1) -> List["np.ndarra
 
     boards = []
     for i in range(n):
-        partial, solved = fv.readline().split(",")
+        ln = fv.readline()
+        if "," in ln:
+            partial, solved = ln.split(",")
+        else:
+            partial = ln.strip("\n")
         boards.append(np.reshape(np.asarray(list(partial), np.int8), (-1, SIZE_OF_BOARD)))
 
     return boards
