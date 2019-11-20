@@ -1,29 +1,25 @@
 from typing import Tuple, List, Dict
 import random
 import sys
+from functions import himmelblau, himmelblau_fitness, decode_himmelblau
 
 PROBABILITY_OF_MUTATION = 0.001
 STRING_LEN = 8 #for himmelblau
 ALPHABET = ["0","1"] #TODO change this to the correct values of the alphabet
 NUM_STRINGS = 10 #TODO change this to a constant of our choice, should be an even number (for mating)
-NUM_GENERATIONS = 2
+NUM_GENERATIONS = 20
 
 #Takes in the list of all strings, and probabalistically selects a list of length len(list_of_strings) based on the relative fitness of each string
-def reproduction(list_of_strings, test_func, decoder) -> List:
+def reproduction(list_of_strings:List[str], test_func, fitness_func, decoder) -> List:
     new_generation_of_strings = []
     probabilities_of_reproduction = []
-    fitnesses = []
-    total_fitness = 0
 
-    for i in range(len(list_of_strings)):
-        fitness = objective(list_of_strings[i], test_func, decoder)
-        fitnesses.append(fitness)
-        total_fitness += fitness
-    
-    print_table(list_of_strings, fitnesses, total_fitness)
+    fitnesses = [objective(string, test_func, fitness_func, decoder) for string in list_of_strings]
+    total_fitness = sum(fitnesses)
 
-    for i in range(len(fitnesses)):
-        probabilities_of_reproduction.append(fitnesses[i] / total_fitness)
+    print_table(list_of_strings, fitnesses, total_fitness,test_func,decoder)
+
+    probabilities_of_reproduction = [0 if total_fitness == 1 else fit / total_fitness for fit in fitnesses ]
 
     for _ in range(NUM_STRINGS):
         rand = random.random() #a number in [0.0, 1.0)
@@ -63,7 +59,7 @@ def attempt_mutation(string):
     return new_string
 
 #takes a list of strings, returns a list of potentially mutated strings
-def perform_mustations(list_of_strings):
+def perform_mutations(list_of_strings):
     new_list_of_strings = []
     for string in list_of_strings:
         new_list_of_strings.append(attempt_mutation(string))
@@ -84,60 +80,32 @@ def perform_mating(list_of_strings):
 
     return new_list_of_strings
 
-def initialize(num_strings: int, alphabet: list) -> list:
-    list_of_strings = []
+def initialize(num_strings:int, alphabet:List[str])-> List[str]:
+    """
+    Generates num_strings random strings with characters in alphabet
+    Args:
+        num_strings: Number of string to be generated 
+        alphabet: Valid characters
+    Returns:
+        List of num_strings random strings with characters in alphabet
+    """
 
-    for _ in range(num_strings):
-        new_string = ""
-        for _ in range(STRING_LEN):
-            new_string += alphabet[random.randint(0,len(alphabet)-1)]
-        list_of_strings.append(new_string)
-    return list_of_strings
+    return ["".join(random.choices(alphabet, k=STRING_LEN)) for _ in range(num_strings)]
 
 
-def print_table(strings, fitnesses, total_fitness):
-    print("String # \t String \t\t Fitness \t\t\t % of total")
+def print_table(strings, fitnesses, total_fitness,func, decoder):
+    print("String # \t String \t\t Fitness \t Coord \t\t Result \t Proportion of total")
     print("====================================================================================================")
     for i in range(len(strings)):
-        print("{} \t\t {} \t\t {} \t\t {}".format(i,strings[i],fitnesses[i],fitnesses[i]/total_fitness))
+        print("{} \t\t {} \t\t {} \t {} \t {} \t {}".format(i,strings[i],fitnesses[i],decoder(strings[i]), func(decoder(strings[i])) ,0 if total_fitness == 0 else fitnesses[i]/total_fitness))
     print("====================================================================================================")
-    print("Total \t\t\t\t\t {} \t\t {}".format(total_fitness, "100.0"))
+    print("Total \t\t\t\t\t {} \t\t {}".format(total_fitness, "1"))
+    print("")
 
 
-def objective(string, test_func, decoder) -> int:
-    return test_func(decoder(string)) 
+def objective(string, test_func, fitness_func,  decoder) -> int:
+    return fitness_func(test_func(decoder(string)))
 
-#domain: -5.12 < x_i < 5.12
-def DeJongSphere(x):
-    return #TODO
-
-#String definition: binary representation of numbers less than 10 for x, then y, ie. 4 bits, repeated twice
-#takes a string, and returns the x and y values in decimal
-def decode_himmelblau(string):
-    x_bin = string[:4]
-    y_bin = string[4:]
-    # print("x_bin",x_bin)
-    # print("y_bin",y_bin)
-    x_dec = 0
-    y_dec = 0
-    for i in range(3,0, -1):
-        x_dec += int(x_bin[i]) * 2 ** (3-i)
-        y_dec += int(y_bin[i]) * 2 ** (3-i)
-    
-    # print("x_dec",x_dec)
-    # print("y_dec",y_dec)
-    
-    return (x_dec - 5, y_dec -5)
-
-#domain: -5 < x,y < 5
-# if x,y not in domain, returns sys.maxsize
-def himmelblau(xy):
-    x,y = xy
-    # print("x:",x," y:",y)
-    if(not -5 < x < 5 or not -5 < y < 5):
-        return sys.maxsize
-    
-    return (x**2 + y -11)**2 + (x + y**2 -7)**2
 
 
 
@@ -145,9 +113,12 @@ def himmelblau(xy):
 #program starts here:
 #-------------------------------------------------------------------------------------------------------------------------------------------
 
+
 strings = initialize(NUM_STRINGS, ALPHABET)
 
 for _ in range(NUM_GENERATIONS):
-    strings = reproduction(strings, himmelblau, decode_himmelblau)
+    strings = reproduction(strings, himmelblau,himmelblau_fitness, decode_himmelblau)
     strings = perform_mating(strings)
-    strings = perform_mustations(strings)
+    strings = perform_mutations(strings)
+
+print(himmelblau((3,2)))
