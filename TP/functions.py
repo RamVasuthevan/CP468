@@ -1,36 +1,45 @@
 import sys
-#domain: -5.12 < x_i < 5.12
-def DeJongSphere(x):
-    return #TODO
+from math import log
+from inspect import signature
+from  textwrap import wrap
+
+DOMAIN = 8
+MAX_VAL = 1000
+
+def himmelblau(x,y):
+    return (x**2 + y -11)**2 + (x + y**2 -7)**2
 
 #String definition: binary representation of numbers less than 10 for x, then y, ie. 4 bits, repeated twice
 #takes a string, and returns the x and y values in decimal
 def decode_himmelblau(string):
     x_bin = string[:4]
     y_bin = string[4:]
-    # print("x_bin",x_bin)
-    # print("y_bin",y_bin)
-    x_dec = 0
-    y_dec = 0
-    for i in range(3,0, -1):
-        x_dec += int(x_bin[i]) * 2 ** (3-i)
-        y_dec += int(y_bin[i]) * 2 ** (3-i)
-    
-    # print("x_dec",x_dec)
-    # print("y_dec",y_dec)
-    
-    return (x_dec - 5, y_dec -5)
+    return signedBin2Dec(x_bin),signedBin2Dec(y_bin)
 
-#domain: -5 < x,y < 5
-# if x,y not in domain, returns sys.maxsize
-def himmelblau(xy):
-    x,y = xy
-    # print("x:",x," y:",y)
-    maxVal = 2**16-1
-    if(not -maxVal < x < maxVal or not -maxVal < y < maxVal):
-        return 1000
+def gen_decoder_function(func):
+    num_arg = len(signature(func).parameters.keys())
+    def inner(string):
+        return (signedBin2Dec(s) for s in wrap(string,num_arg))
+    return inner
 
-    return (x**2 + y -11)**2 + (x + y**2 -7)**2
+def signedBin2Dec(s):
+    sign = int(s[0])
+    if not sign:
+        sign = -1
+    return sign*int(s[1:],2)
 
-def himmelblau_fitness(val):
-    return 1000-val
+def functionWithDomain(func):
+    def inner(*args):
+        if any(map(lambda x:x > DOMAIN, args)):
+            return MAX_VAL
+        else:
+            return func(*args)
+    return inner
+
+def fitness_func(val):
+    return max(MAX_VAL - val, 0)
+
+def string2fitness(test_func,fitness_func,decoder_func):
+    def inner(s:str)->int:
+        return fitness_func(test_func(*decoder_func(s)))
+    return inner

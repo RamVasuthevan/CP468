@@ -1,71 +1,28 @@
 from typing import Tuple, List, Dict
 import random
+import heapq
+from math import ceil, log
 import sys
-from functions import himmelblau, himmelblau_fitness, decode_himmelblau
+from functions import himmelblau, fitness_func, functionWithDomain, string2fitness, DOMAIN, MAX_VAL, decode_himmelblau
+
+
+BIN_ALPHABET = ["0","1"]
+STRING_LEN = (ceil(log(DOMAIN, 2))+1)*2
 
 PROBABILITY_OF_MUTATION = 0.001
-STRING_LEN = 8 #for himmelblau
-ALPHABET = ["0","1"] #TODO change this to the correct values of the alphabet
-NUM_STRINGS = 10 #TODO change this to a constant of our choice, should be an even number (for mating)
-NUM_GENERATIONS = 20
+NUM_STRINGS = 10
+NUM_GENERATIONS = 50
 
 #Takes in the list of all strings, and probabalistically selects a list of length len(list_of_strings) based on the relative fitness of each string
-def reproduction(list_of_strings:List[str], test_func, fitness_func, decoder) -> List:
-    new_generation_of_strings = []
-    probabilities_of_reproduction = []
-
-    fitnesses = [objective(string, test_func, fitness_func, decoder) for string in list_of_strings]
+def perform_repoduction(strings, string2fitness) -> List:
+    fitnesses = [ string2fitness(s) for s in strings]
     total_fitness = sum(fitnesses)
-
-    print_table(list_of_strings, fitnesses, total_fitness,test_func,decoder)
-
-    probabilities_of_reproduction = [0 if total_fitness == 1 else fit / total_fitness for fit in fitnesses ]
-
-    for _ in range(NUM_STRINGS):
-        rand = random.random() #a number in [0.0, 1.0)
-
-        bottom = 0
-        top = probabilities_of_reproduction[0]
-        i = 0
-        while not bottom < rand <= top:
-            i += 1
-            bottom = top
-            top = probabilities_of_reproduction[i] + top
-        # i should now be the index of the string selected to reproduce
-
-        new_generation_of_strings.append(list_of_strings[i])
-    
-    return new_generation_of_strings
-
-# takes two strings for crossover. Randomly selects a crossover point between 1 and len(s1)-1. Performs crossover on and returns both new strings.
-#assumes len(s1) = len(s2)
-def crossover_pair(s1, s2):
-    crossover_point = random.randint(1, len(s1)-2)
-
-    s1p = s1[:crossover_point] + s2[crossover_point:]
-    s2p = s2[:crossover_point] + s1[crossover_point:]
-
-    return (s1p, s2p)
-
-def attempt_mutation(string):
-    new_string = ""
-    for i in range(len(string)):
-        rand = random.random()
-        if(rand < PROBABILITY_OF_MUTATION): #then mutate
-            new_string += ALPHABET[random.randint(0, len(ALPHABET)-1)] #TODO see if we need to exclude the previous value of string[i] when ewe mutate
-        else:
-            new_string += string[i]
-
-    return new_string
+    probabilities_of_reproduction = [0 if total_fitness == 0 else fit / total_fitness for fit in fitnesses ]
+    return random.choices(population=strings,weights=probabilities_of_reproduction,k=NUM_STRINGS)
 
 #takes a list of strings, returns a list of potentially mutated strings
 def perform_mutations(list_of_strings):
-    new_list_of_strings = []
-    for string in list_of_strings:
-        new_list_of_strings.append(attempt_mutation(string))
-    return new_list_of_strings
-
-
+    return [attempt_mutation(s) for s in list_of_strings]
 
 def perform_mating(list_of_strings):
     new_list_of_strings = []
@@ -80,6 +37,35 @@ def perform_mating(list_of_strings):
 
     return new_list_of_strings
 
+def select_best(strings,string2fitness ):
+    return max(strings, key=string2fitness)
+
+def delete_worst(strings,string2fitness):
+    minVal = min(strings, key=string2fitness)
+    strings.remove(minVal)
+    return strings
+
+def attempt_mutation(s):
+   #bit flipping 
+    if random.random() > PROBABILITY_OF_MUTATION:
+       bit_to_flip = random.randint(0,len(s)-1)
+       s = list(s)
+       s[bit_to_flip] = random.choice(BIN_ALPHABET)
+       return "".join(s)
+    else:
+        return s
+
+# takes two strings for crossover. Randomly selects a crossover point between 1 and len(s1)-1. Performs crossover on and returns both new strings.
+#assumes len(s1) = len(s2)
+def crossover_pair(s1, s2):
+    crossover_point = random.randint(1, len(s1)-2)
+
+    s1p = s1[:crossover_point] + s2[crossover_point:]
+    s2p = s2[:crossover_point] + s1[crossover_point:]
+
+    return (s1p, s2p)
+
+
 def initialize(num_strings:int, alphabet:List[str])-> List[str]:
     """
     Generates num_strings random strings with characters in alphabet
@@ -93,13 +79,15 @@ def initialize(num_strings:int, alphabet:List[str])-> List[str]:
     return ["".join(random.choices(alphabet, k=STRING_LEN)) for _ in range(num_strings)]
 
 
-def print_table(strings, fitnesses, total_fitness,func, decoder):
-    print("String # \t String \t\t Fitness \t Coord \t\t Result \t Proportion of total")
-    print("====================================================================================================")
-    for i in range(len(strings)):
-        print("{} \t\t {} \t\t {} \t {} \t {} \t {}".format(i,strings[i],fitnesses[i],decoder(strings[i]), func(decoder(strings[i])) ,0 if total_fitness == 0 else fitnesses[i]/total_fitness))
-    print("====================================================================================================")
-    print("Total \t\t\t\t\t {} \t\t {}".format(total_fitness, "1"))
+def print_table(strings, test_func,fitness_func,decoder_func):
+    total_fitness = sum([fitness_func(test_func(*decoder_func(s))) for s in strings])
+    proportion = [0 if total_fitness == 0 else fitness_func(test_func(*decoder_func(s))) / total_fitness for s in strings ]
+
+    print("String \t\t Fitness \t Coord \t\t Result \t Proportion of total")
+    print("="*100)
+    for s,p in zip(strings,proportion):
+        print("{} \t\t {} \t\t {} \t {} \t {}".format(s,fitness_func(test_func(*decoder_func(s))),decoder_func(s),test_func(*decoder_func(s)),p))
+    print("="*100)
     print("")
 
 
@@ -107,18 +95,23 @@ def objective(string, test_func, fitness_func,  decoder) -> int:
     return fitness_func(test_func(decoder(string)))
 
 
-
-
-
 #program starts here:
 #-------------------------------------------------------------------------------------------------------------------------------------------
 
+strings = initialize(NUM_STRINGS, BIN_ALPHABET)
+decode_func = decode_himmelblau
+s2f = string2fitness(himmelblau,fitness_func,decode_func)
+test_func = functionWithDomain(himmelblau)
 
-strings = initialize(NUM_STRINGS, ALPHABET)
 
 for _ in range(NUM_GENERATIONS):
-    strings = reproduction(strings, himmelblau,himmelblau_fitness, decode_himmelblau)
+    strings = perform_repoduction(strings, s2f)
+    
+    best = select_best(strings,s2f)
+
     strings = perform_mating(strings)
     strings = perform_mutations(strings)
 
-print(himmelblau((3,2)))
+    strings = delete_worst(strings, s2f)+[best]
+
+    print_table(strings, test_func, fitness_func, decode_func)
