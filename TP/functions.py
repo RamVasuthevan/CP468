@@ -7,7 +7,7 @@ DOMAIN = 8
 MAX_VAL = 1000
 
 def himmelblau(x,y):
-    return (x**2 + y -11)**2 + (x + y**2 -7)**2
+    return (x**2 + y - 11)**2 + (x + y**2 - 7)**2
 
 #String definition: binary representation of numbers less than 10 for x, then y, ie. 4 bits, repeated twice
 #takes a string, and returns the x and y values in decimal
