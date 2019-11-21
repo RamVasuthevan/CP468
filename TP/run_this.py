@@ -13,8 +13,19 @@ PROBABILITY_OF_MUTATION = 0.001
 NUM_STRINGS = 10
 NUM_GENERATIONS = 50
 
-#Takes in the list of all strings, and probabalistically selects a list of length len(list_of_strings) based on the relative fitness of each string
-def perform_repoduction(strings, string2fitness) -> List:
+def perform_reproduction(strings, string2fitness) -> List:
+    """
+    Takes two strings for crossover. Randomly selects a crossover point between 1 and len(s1)-1. 
+    Performs crossover on and returns both new strings.
+    Assumes len(s1) = len(s2)
+
+    Args:
+        s1: Binary string for mating crossover
+        s2: Binary string for mating crossover
+    Returns:
+        s1p: Binary string from mating crossover
+        s2p: Binary string from mating crossover
+    """
     fitnesses = [ string2fitness(s) for s in strings]
     total_fitness = sum(fitnesses)
     probabilities_of_reproduction = [0 if total_fitness == 0 else fit / total_fitness for fit in fitnesses ]
@@ -22,9 +33,25 @@ def perform_repoduction(strings, string2fitness) -> List:
 
 #takes a list of strings, returns a list of potentially mutated strings
 def perform_mutations(list_of_strings):
+    """
+    Takes a list of strings, returns a list of potentially mutated binary strings
+
+    Args:
+        string: List of binary strings to mutate
+    Returns:
+        new_list_of_strings: List of potentially mutated binary strings
+    """
     return [attempt_mutation(s) for s in list_of_strings]
 
 def perform_mating(list_of_strings):
+    """
+    Takes a list of strings, returns a list of binary strings after crossover operation
+
+    Args:
+        list_of_strings: List of binary strings to mate
+    Returns:
+        new_list_of_strings: List of binary strings after crossover operation
+    """
     new_list_of_strings = []
 
     while(len(list_of_strings) > 0):
@@ -46,6 +73,14 @@ def delete_worst(strings,string2fitness):
     return strings
 
 def attempt_mutation(s):
+    """
+    Takes a string to perform low probability bit mutation on
+
+    Args:
+        s: Binary string to mutate
+    Returns:
+        new_string: Mutated binary string
+    """
    #bit flipping 
     if random.random() > PROBABILITY_OF_MUTATION:
        bit_to_flip = random.randint(0,len(s)-1)
@@ -55,9 +90,19 @@ def attempt_mutation(s):
     else:
         return s
 
-# takes two strings for crossover. Randomly selects a crossover point between 1 and len(s1)-1. Performs crossover on and returns both new strings.
-#assumes len(s1) = len(s2)
 def crossover_pair(s1, s2):
+    """
+    Takes two strings for crossover. Randomly selects a crossover point between 1 and len(s1)-1. 
+    Performs crossover on and returns both new strings.
+    Assumes len(s1) = len(s2)
+
+    Args:
+        s1: Binary string for mating crossover
+        s2: Binary string for mating crossover
+    Returns:
+        s1p: Binary string from mating crossover
+        s2p: Binary string from mating crossover
+    """
     crossover_point = random.randint(1, len(s1)-2)
 
     s1p = s1[:crossover_point] + s2[crossover_point:]
@@ -68,18 +113,28 @@ def crossover_pair(s1, s2):
 
 def initialize(num_strings:int, alphabet:List[str])-> List[str]:
     """
-    Generates num_strings random strings with characters in alphabet
+    Generates num_strings of random binary strings with characters in alphabet
+
     Args:
         num_strings: Number of string to be generated 
         alphabet: Valid characters
     Returns:
-        List of num_strings random strings with characters in alphabet
+        List of num_strings random binary strings with characters in alphabet
     """
 
     return ["".join(random.choices(alphabet, k=STRING_LEN)) for _ in range(num_strings)]
 
 
 def print_table(strings, test_func,fitness_func,decoder_func):
+    """ #TODO finish docstring
+    Generates num_strings of random binary strings with characters in alphabet
+
+    Args:
+        num_strings: Number of string to be generated 
+        alphabet: Valid characters
+    Prints:
+        Table containing
+    """
     total_fitness = sum([fitness_func(test_func(*decoder_func(s))) for s in strings])
     proportion = [0 if total_fitness == 0 else fitness_func(test_func(*decoder_func(s))) / total_fitness for s in strings ]
 
@@ -105,7 +160,7 @@ test_func = functionWithDomain(himmelblau)
 
 
 for _ in range(NUM_GENERATIONS):
-    strings = perform_repoduction(strings, s2f)
+    strings = perform_reproduction(strings, s2f)
     
     best = select_best(strings,s2f)
 
