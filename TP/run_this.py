@@ -89,8 +89,8 @@ def attempt_mutation(s):
 
 def crossover_pair(s1, s2):
     """
-    Takes two strings for crossover. Randomly selects a crossover point between 1 and len(s1)-1. 
-    Performs crossover on and returns both new strings.
+    Takes two binary strings for crossover. Randomly selects a crossover point between 1 and len(s1)-1. 
+    Performs crossover then returns mated binary string pair.
     Assumes len(s1) = len(s2)
 
     Args:
@@ -124,7 +124,7 @@ def initialize(num_strings:int, alphabet:List[str])-> List[str]:
 
 def print_table(strings, test_func,fitness_func,decoder_func):
     """ 
-    Pretty prints tested binary string mating pools and each string's reproduction performance stats
+    Takes in binary string mating pool and pretty prints each string's reproduction performance stats
 
     Args:
         strings: List of binary strings that makes up the mating pool
@@ -156,9 +156,16 @@ def objective(string, test_func, fitness_func,  decoder) -> int:
 #program starts here:
 #-------------------------------------------------------------------------------------------------------------------------------------------
 
+#create initial mating pool
 strings = initialize(NUM_STRINGS, BIN_ALPHABET)
+
+#choose method for decoding binary strings
 decode_func = decode_himmelblau
+
+#choose fitness regimine TODO define operation
 s2f = string2fitness(himmelblau,fitness_func,decode_func)
+
+#TODO define operation
 test_func = functionWithDomain(himmelblau)
 
 
