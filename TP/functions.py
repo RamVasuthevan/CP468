@@ -40,6 +40,19 @@ def fitness_func(val):
     return max(MAX_VAL - val, 0)
 
 def string2fitness(test_func,fitness_func,decoder_func):
+    """#TODO update docstring
+    Takes in mating pool of binary strings, and probabalistically selects a list of length, len(list_of_strings), 
+    based on the relative fitness of each string
+
+    Args:
+        test_func: Function used to test found fitness  ex: Himmelblau (1000 - 0) 
+                    Results closer to zero are closer to optimization
+        fitness_func: Compares fitness measure to benchmark of optimization  ex: Himmelblau (0 - 1000)
+                    Higher values are higher fitness
+        decoder: Used to decode binary strings into integers
+    Returns:
+        new_generation_of_strings: List of binary strings
+    """
     def inner(s:str)->int:
         return fitness_func(test_func(*decoder_func(s)))
     return inner

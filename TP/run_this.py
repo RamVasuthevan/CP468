@@ -14,24 +14,21 @@ NUM_STRINGS = 10
 NUM_GENERATIONS = 50
 
 def perform_reproduction(strings, string2fitness) -> List:
-    """
-    Takes two strings for crossover. Randomly selects a crossover point between 1 and len(s1)-1. 
-    Performs crossover on and returns both new strings.
-    Assumes len(s1) = len(s2)
+    """#TODO update docstring
+    Takes in mating pool of binary strings, and probabalistically selects a list of length, len(list_of_strings), 
+    based on the relative fitness of each string
 
     Args:
-        s1: Binary string for mating crossover
-        s2: Binary string for mating crossover
+        strings: List of binary strings that makes up the mating pool
+        string2fitness: 
     Returns:
-        s1p: Binary string from mating crossover
-        s2p: Binary string from mating crossover
+        new_generation_of_strings: List of binary strings
     """
     fitnesses = [ string2fitness(s) for s in strings]
     total_fitness = sum(fitnesses)
     probabilities_of_reproduction = [0 if total_fitness == 0 else fit / total_fitness for fit in fitnesses ]
     return random.choices(population=strings,weights=probabilities_of_reproduction,k=NUM_STRINGS)
 
-#takes a list of strings, returns a list of potentially mutated strings
 def perform_mutations(list_of_strings):
     """
     Takes a list of strings, returns a list of potentially mutated binary strings
@@ -126,23 +123,29 @@ def initialize(num_strings:int, alphabet:List[str])-> List[str]:
 
 
 def print_table(strings, test_func,fitness_func,decoder_func):
-    """ #TODO finish docstring
-    Generates num_strings of random binary strings with characters in alphabet
+    """ 
+    Pretty prints tested binary string mating pools and each string's reproduction performance stats
 
     Args:
-        num_strings: Number of string to be generated 
-        alphabet: Valid characters
+        strings: List of binary strings that makes up the mating pool
+        test_func: Function used to test found fitness  ex: Himmelblau (1000 - 0) 
+                    Results closer to zero are closer to optimization
+        fitness_func: Compares fitness measure to benchmark of optimization  ex: Himmelblau (0 - 1000)
+                    Higher values are higher fitness
+        decoder_func: Used to decode binary strings into integers
     Prints:
-        Table containing
+        Table containing binary string; its performed fitness level with the test function; 
+        (x, y) cartesian coordinates used as inputs for test function; result of measured fitness compared to benchmark value;
+        and the likelihood that the string will reproduce, as a proportion of its fitness to the accumulated fitness of its mating pool.
     """
     total_fitness = sum([fitness_func(test_func(*decoder_func(s))) for s in strings])
     proportion = [0 if total_fitness == 0 else fitness_func(test_func(*decoder_func(s))) / total_fitness for s in strings ]
 
-    print("String \t\t Fitness \t Coord \t\t Result \t Proportion of total")
-    print("="*100)
+    print("{:11}{:11}{:11}{:11}{:>15}".format("String", "Fitness", "Coord", "Result", "Proportion of total"))
+    print("="*65)
     for s,p in zip(strings,proportion):
-        print("{} \t\t {} \t\t {} \t {} \t {}".format(s,fitness_func(test_func(*decoder_func(s))),decoder_func(s),test_func(*decoder_func(s)),p))
-    print("="*100)
+        print("{:11s}{:<11}{}{:4}{:<11}{:>.15f}".format(s,fitness_func(test_func(*decoder_func(s))),decoder_func(s),"",test_func(*decoder_func(s)),p)) #TODO wasn't able to figure out how to format print a tuple with padding so that the last 2 columns would look consistent
+    print("="*65)
     print("")
 
 
