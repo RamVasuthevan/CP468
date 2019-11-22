@@ -7,11 +7,28 @@ DOMAIN = 8
 MAX_VAL = 1000
 
 def himmelblau(x,y):
+    """
+    Takes in x, y cartesian coordinate values as arguments to apply Himmelblau function to
+
+    Args:
+        x: integer value representing x coordinate
+        y: integer value representing y coordinate
+    Returns:
+        value between 0 - 1000, 1000 being the most optimized value
+    """
     return (x**2 + y - 11)**2 + (x + y**2 - 7)**2
 
 #String definition: binary representation of numbers less than 10 for x, then y, ie. 4 bits, repeated twice
 #takes a string, and returns the x and y values in decimal
 def decode_himmelblau(string):
+    """
+    Takes in binary word and converts 4 leftmost digits to x cartesian coordinate and 4 rightmost digits to y cartesian coordinate
+
+    Args:
+        string: binary word
+    Returns:
+        (x,y) cartesian coordinates
+    """
     x_bin = string[:4]
     y_bin = string[4:]
     return signedBin2Dec(x_bin),signedBin2Dec(y_bin)

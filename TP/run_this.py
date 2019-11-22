@@ -128,14 +128,17 @@ def print_table(strings, test_func,fitness_func,decoder_func):
 
     Args:
         strings: List of binary strings that makes up the mating pool
-        test_func: Function used to test found fitness  ex: Himmelblau (1000 - 0) 
+        test_func: Function used to test the found fitness  ex: Himmelblau (1000 - 0) 
                     Results closer to zero are closer to optimization
         fitness_func: Compares fitness measure to benchmark of optimization  ex: Himmelblau (0 - 1000)
                     Higher values are higher fitness
         decoder_func: Used to decode binary strings into integers
     Prints:
-        Table containing binary string; its performed fitness level with the test function; 
-        (x, y) cartesian coordinates used as inputs for test function; result of measured fitness compared to benchmark value;
+        Table containing: 
+        binary string - left 4 bits are x-coord, right 4 bits are y-coord; 
+        its performed fitness level with the test function (higher is better); 
+        (x, y) cartesian coordinates used as inputs for test function; 
+        result of measured fitness compared to benchmark value (lower is better);
         and the likelihood that the string will reproduce, as a proportion of its fitness to the accumulated fitness of its mating pool.
     """
     total_fitness = sum([fitness_func(test_func(*decoder_func(s))) for s in strings])
