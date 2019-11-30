@@ -1,22 +1,21 @@
-from TP.simple_genetic_algorithm import SGA
+from simple_genetic_algorithm import SGA
 
-BIN_ALPHABET = ["0", "1"]
-STRING_LEN = 16
-NUMBER_OF_VARIABLES = 2
-VARIABLE_LEN = 8
+ALNUM = ["0", "1"]
+VAR_STRING_LEN = 12
+VARIABLE_LEN = 6
 PROBABILITY_OF_MUTATION = 0.005
 PROBABILITY_OF_CROSSOVER = 0.5
 NUM_STRINGS = 100
 NUM_GENERATIONS = 100
-DOMAIN_START = -6
-DOMAIN_END = 6
+DOMAIN_MIN = -6
+DOMAIN_MAX = 6
 
-
+#TODO docstring
 def himmelblau(*xs):
     x = xs[0]
     y = xs[1]
     return (x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2
 
-
-SGA(himmelblau, NUM_STRINGS, BIN_ALPHABET, STRING_LEN, VARIABLE_LEN, DOMAIN_START, DOMAIN_END, NUM_GENERATIONS,
+print("Running Simple Genetic Algorithm on Himmelblau benchmark function")
+SGA(himmelblau, NUM_STRINGS, ALNUM, VAR_STRING_LEN, VARIABLE_LEN, DOMAIN_MIN, DOMAIN_MAX, NUM_GENERATIONS,
     PROBABILITY_OF_MUTATION, PROBABILITY_OF_MUTATION)
