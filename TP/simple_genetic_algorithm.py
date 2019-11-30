@@ -80,7 +80,7 @@ def perform_mating(population, probability_of_crossover):
     return new_pop
 
 
-def crossover_pair(s1, s2, probability_of_crossover):
+def crossover_pair(s1, s2):
     """
     Takes two strings for crossover. Randomly determines if the selects a crossover point 
     between 1 and len(s1)-1. Compares probability_of_crossover > random floating point between [0.0, 1.0)
@@ -94,13 +94,10 @@ def crossover_pair(s1, s2, probability_of_crossover):
         s1p: Binary string from mating crossover
         s2p: Binary string from mating crossover
     """
-    if random.random() < probability_of_crossover:
-        crossover_point = random.randint(1, len(s1) - 2)
-        s1p = s1[:crossover_point] + s2[crossover_point:]
-        s2p = s2[:crossover_point] + s1[crossover_point:]
-    else:
-        s1p = s1
-        s2p = s2
+    crossover_point = random.randint(1, len(s1) - 2)
+    s1p = s1[:crossover_point] + s2[crossover_point:]
+    s2p = s2[:crossover_point] + s1[crossover_point:]
+
     return (s1p, s2p)
 
 
