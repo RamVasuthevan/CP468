@@ -1,4 +1,6 @@
-from TP.simple_genetic_algorithm import SGA
+# from TP.simple_genetic_algorithm import SGA
+
+from simple_genetic_algorithm import SGA
 
 BIN_ALPHABET = ["0", "1"]
 STRING_LEN = 20
@@ -7,7 +9,7 @@ VARIABLE_LEN = 5
 PROBABILITY_OF_MUTATION = 0.05
 # PROBABILITY_OF_CROSSOVER = 0.5
 NUM_STRINGS = 40
-NUM_GENERATIONS = 100
+NUM_GENERATIONS = 1000
 DOMAIN_START = -5.12
 DOMAIN_END = 5.12
 

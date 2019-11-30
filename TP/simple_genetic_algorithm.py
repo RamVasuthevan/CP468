@@ -1,9 +1,9 @@
 from typing import List
 import random
-from TP.functions import general_decoder
+from functions import general_decoder
 
 
-def perform_reproduction(population, fitness_func) -> List:
+def perform_reproduction(population, inverse_fitness_func) -> List:
     """#TODO update docstring
     Takes in mating pool of binary strings, and probabalistically selects a list of length, len(list_of_strings), 
     based on the relative fitness of each string
@@ -14,8 +14,9 @@ def perform_reproduction(population, fitness_func) -> List:
     Returns:
         new_generation_of_strings: List of binary strings
     """
-    min_fitness = min(fitness_func(m) for m in population)
-    fitnesses = [1 / (fitness_func(s) - min_fitness + 1) for s in population]
+    # # max_fitness = min(inverse_fitness_func(m) for m in population)
+    fitnesses = [1 / (inverse_fitness_func(s)+1) for s in population]
+
     total_fitness = sum(fitnesses)
     probabilities_of_reproduction = [fit / total_fitness for fit in fitnesses]
     return random.choices(population=population, weights=probabilities_of_reproduction, k=len(population))
@@ -33,7 +34,7 @@ def perform_mutations(list_of_strings, probability_of_mutation, alphabet):
     return [attempt_mutation(s, probability_of_mutation, alphabet) for s in list_of_strings]
 
 
-def perform_mating(list_of_strings, probability_of_crossover):
+def perform_mating(list_of_strings):
     """
     Takes a list of strings, returns a list of binary strings after crossover operation
 
@@ -48,7 +49,7 @@ def perform_mating(list_of_strings, probability_of_crossover):
         s1 = list_of_strings.pop(random.randint(0, len(list_of_strings) - 1))
         s2 = list_of_strings.pop(random.randint(0, len(list_of_strings) - 1))
 
-        s1p, s2p = crossover_pair(s1, s2, probability_of_crossover)
+        s1p, s2p = crossover_pair(s1, s2)
         new_list_of_strings.append(s1p)
         new_list_of_strings.append(s2p)
 
@@ -147,19 +148,26 @@ def print_table(strings, test_func, fitness_func, decoder_func):
 # program starts here:
 # -------------------------------------------------------------------------------------------------------------------------------------------
 def SGA(test_function, num_strings, alphabet, string_length, variable_length, domain_start, domain_end,
-        number_of_generations, probability_of_mutation, probability_of_crossover):
+        number_of_generations, probability_of_mutation):
     population = initialize(num_strings, alphabet, string_length)
-    fitness = lambda string: test_function(*general_decoder(string, variable_length, domain_start, domain_end))
+    inverse_fitness = lambda string: test_function(*general_decoder(string, variable_length, domain_start, domain_end))
 
+    last_individual = []
     for i in range(number_of_generations):
-        population = perform_reproduction(population, fitness)
-        population = perform_mating(population, probability_of_crossover)
+        population = perform_reproduction(population, inverse_fitness)
+        population = perform_mating(population)
         population = perform_mutations(population, probability_of_mutation, alphabet)
 
-        min_fitness = min(fitness(m) for m in population)
+        max_fitness = max(1/(inverse_fitness(m)+1) for m in population)
         for m in population:
-            if fitness(m) == min_fitness:
+            if 1/(inverse_fitness(m)+1) == max_fitness:
                 best_individual = general_decoder(m, variable_length, domain_start, domain_end)
-        print("Generation ", i, ":")
-        print("Best Individual: ", best_individual)
-        print("Fitness: ", min_fitness)
+        
+        if(len(last_individual)==0 or not last_individual == best_individual):
+            last_individual=best_individual
+            print("Generation ", i, ":")
+            print("Best Individual: ", best_individual)
+            print("Fitness: ", max_fitness)
+        elif(last_individual == best_individual):
+            print("Generation ", i, "no change")
+

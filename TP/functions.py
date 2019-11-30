@@ -1,3 +1,5 @@
+
+#normalization
 def num_in_interval(lo, hi, mult, steps):
     step_size = (hi - lo) / steps
     return lo + mult * step_size
