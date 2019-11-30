@@ -18,7 +18,7 @@ def initialize(num_strings: int, alnum_set: List[str], var_string_length) -> Lis
     return ["".join(random.choices(alnum_set, k=var_string_length)) for _ in range(num_strings)]
 
 
-def perform_reproduction(population, fitness_func) -> List:
+def perform_reproduction(population, inverse_fitness_func) -> List:
     """
     Takes in a population of strings and probabalistically candidates for mating  based on the 
     relative fitness of each string (i.e. the more fit members of the population will be picked more often
@@ -26,22 +26,25 @@ def perform_reproduction(population, fitness_func) -> List:
 
     Args:
         population (List[str]): List of strings that make up the mating pool
-        fitness_func (<function>): Benchmark function with known global minima; returned values
-                                    closer to zero mean the given arguments are closer to optimum
-                                Args:
-                                    (str): Alphanumeric string representing a number system value(s)
-                                Returns:
-                                    (float): floating point value between 0 to 1; results closer to zero are closer to optimization
+        #TODO convert description to fit inverse_fitness_func
+        # fitness_func (<function>): Benchmark function with known global minima; returned values
+        #                             closer to zero mean the given arguments are closer to optimum
+        #                         Args:
+        #                             (str): Alphanumeric string representing a number system value(s)
+        #                         Returns:
+        #                             (float): floating point value between 0 to 1; results closer to zero are closer to optimization
     Returns:
         (List[str]): List of strings that make up the new mating pool generation
     """
 
-    #determine the minimum found fitness within the population
-    min_fitness = min(fitness_func(m) for m in population)
+    #TODO clean up this section for change of fitness test
+    # #determine the minimum found fitness within the population
+    # min_fitness = min(fitness_func(m) for m in population)
 
+    #TODO confirm docstring matches change to fitness measure
     #compile a list of all found fitness values of the population as a measure of it against the su
     #compile a list of floating point values between 0 to 1, numbers closer to 0 have a higher fitness 
-    fitnesses = [1 / (fitness_func(s) - min_fitness + 1) for s in population]
+    fitnesses = [1 / (inverse_fitness_func(s)+1) for s in population]
 
     #sum up all found fitness measures 
     total_fitness = sum(fitnesses)
@@ -54,15 +57,12 @@ def perform_reproduction(population, fitness_func) -> List:
     return random.choices(population=population, weights=probabilities_of_reproduction, k=len(population))
 
 
-def perform_mating(population, probability_of_crossover):
+def perform_mating(population):
     """
     Takes a list of binary strings, returns a list of binary strings after potential crossover operations
 
     Args:
         population (List[str]): List of strings that make up the mating pool
-        probability_of_crossover (float): decimal number between 0 and 1 that represents the liklihood
-                                            that 2 randomly selected members of the mating pool will 
-                                            perform a crossover of characters
     Returns:
         (List[str]): List of strings that make up the now potentially modified mating pool 
     """
@@ -73,7 +73,7 @@ def perform_mating(population, probability_of_crossover):
         s1 = population.pop(random.randint(0, len(population) - 1))
         s2 = population.pop(random.randint(0, len(population) - 1))
 
-        s1p, s2p = crossover_pair(s1, s2, probability_of_crossover)
+        s1p, s2p = crossover_pair(s1, s2)
         new_pop.append(s1p)
         new_pop.append(s2p)
 
@@ -185,7 +185,7 @@ def print_table(strings, test_func, fitness_func, decoder_func):
 # -------------------------------------------------------------------------------------------------------------------------------------------
 #TODO docstring
 def SGA(test_function, num_strings, alnum_set, var_string_length, variable_length, domain_min, domain_max,
-        number_of_generations, probability_of_mutation, probability_of_crossover):
+        number_of_generations, probability_of_mutation):
     """
     Simple Genetic Algorithm that finds optimal 
 
@@ -200,7 +200,6 @@ def SGA(test_function, num_strings, alnum_set, var_string_length, variable_lengt
         number_of_generations (int): number of times to mate / mutate the poulation in the attempt to hone in
                                         on the optimal input values for the given test_function
         probability_of_mutation (float):
-        probability_of_crossover (float):
     Returns:
         None
     """
@@ -211,26 +210,34 @@ def SGA(test_function, num_strings, alnum_set, var_string_length, variable_lengt
 
     #small anonymous function used to find fitness measures of a member of a mating pool population, 
     #determined by the given benchmark test function
-    fitness = lambda string: test_function(*general_decoder(string, variable_length, domain_min, domain_max, len(alnum_set)))
-    
+    inverse_fitness = lambda string: test_function(*general_decoder(string, variable_length, domain_min, domain_max, len(alnum_set)))
+
+
     #print results
     print("\nTested population size: ", num_strings, ", Number of generations: ", number_of_generations)
     print("\nGeneration \t Strongest Candidate \t Fitness")
     print("="*100)
 
     #TODO docstring
+    last_individual = []
     for i in range(number_of_generations):
-        population = perform_reproduction(population, fitness)
-        population = perform_mating(population, probability_of_crossover)
+        population = perform_reproduction(population, inverse_fitness)
+        population = perform_mating(population)
         population = perform_mutations(population, probability_of_mutation, alnum_set)
 
-        min_fitness = min(fitness(m) for m in population)
+        max_fitness = max(1/(inverse_fitness(m)+1) for m in population)
         
         #print perfromance of poulation
         for m in population:
-            if fitness(m) == min_fitness:
+            if 1/(inverse_fitness(m)+1) == max_fitness:
                 best_individual = general_decoder(m, variable_length, domain_min, domain_max, len(alnum_set))
-        print("{:<10d} \t {} \t {} \t".format(i, best_individual, min_fitness))
+        
+        #TODO docstring
+        if(len(last_individual)==0 or not last_individual == best_individual):
+            last_individual=best_individual
+            print("{:<10d} \t {} \t {} \t".format(i, best_individual, max_fitness))
+        elif(last_individual == best_individual):
+            print("Generation ", i, "no change")
     
     print("="*100)
     print("")
