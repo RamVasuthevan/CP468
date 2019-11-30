@@ -74,7 +74,7 @@ def attempt_mutation(s, probability_of_mutation, alphabet):
         return s
 
 
-def crossover_pair(s1, s2, probability_of_crossover):
+def crossover_pair(s1, s2):
     """
     Takes two strings for crossover. Randomly selects a crossover point between 1 and len(s1)-1. 
     Performs crossover on and returns both new strings.
@@ -87,13 +87,13 @@ def crossover_pair(s1, s2, probability_of_crossover):
         s1p: Binary string from mating crossover
         s2p: Binary string from mating crossover
     """
-    if random.random() < probability_of_crossover:
-        crossover_point = random.randint(1, len(s1) - 2)
-        s1p = s1[:crossover_point] + s2[crossover_point:]
-        s2p = s2[:crossover_point] + s1[crossover_point:]
-    else:
-        s1p = s1
-        s2p = s2
+    
+    crossover_point = random.randint(1, len(s1) - 2)
+    s1p = s1[:crossover_point] + s2[crossover_point:]
+    s2p = s2[:crossover_point] + s1[crossover_point:]
+
+    s1p = s1
+    s2p = s2
     return (s1p, s2p)
 
 
