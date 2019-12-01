@@ -45,7 +45,14 @@ def perform_reproduction(population, inverse_fitness_func) -> List:
     #TODO confirm docstring matches change to fitness measure
     #compile a list of all found fitness values of the population as a measure of it against the su
     #compile a list of floating point values between 0 to 1, numbers closer to 0 have a higher fitness 
-    fitnesses = [1 / (inverse_fitness_func(s)+1) for s in population]
+
+    #Normalize the inverse fitnesses to [0,1]
+    inverse_fitnesses = [inverse_fitness_func(s) for s in population]
+    min_inv_fit = min(inverse_fitnesses)
+    max_inv_fit = max(inverse_fitnesses)
+    inverse_fitnesses = [(X-min_inv_fit)/(max_inv_fit-min_inv_fit+1) for X in inverse_fitnesses]    #adding 1 to avoid division by zero
+
+    fitnesses = [1 / ((s)+1) for s in inverse_fitnesses]
 
     #sum up all found fitness measures 
     total_fitness = sum(fitnesses)
