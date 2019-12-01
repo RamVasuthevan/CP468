@@ -1,6 +1,7 @@
 from typing import List
 import random
 from functions import general_decoder
+import matplotlib.pyplot as plt 
 
 LENGTH_OF_DECIMAL=4
 
@@ -213,7 +214,7 @@ def SGA(test_function, pop_size, alnum_set, var_string_length, variable_length, 
     Prints:
         table: generational performances, avoiding repeat max performance levels between contiguous generations
     """
-    
+    max_fitness_list =[]
     #initialize a random population of pop_size values to be the starting point for optimization attempt
     #returns string with (var_string_length * pop_size) number of characters
     population = initialize(pop_size, alnum_set, var_string_length)
@@ -244,6 +245,7 @@ def SGA(test_function, pop_size, alnum_set, var_string_length, variable_length, 
 
         #determine the max fitness measure of this generation
         max_fitness = max(1/(inverse_fitness(m)+1) for m in population)
+        max_fitness_list.append(max_fitness)
         
         #determine the string variable values that have max_fitness of this generation
         for m in population:
@@ -272,3 +274,5 @@ def SGA(test_function, pop_size, alnum_set, var_string_length, variable_length, 
     
     print("="*80)
     print("")
+    plt.plot(max_fitness_list)
+    plt.show()

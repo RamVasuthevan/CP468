@@ -17,5 +17,3 @@ def dejong(*xs):
 print("Running Simple Genetic Algorithm on De Jong Sphere benchmark function")
 SGA(dejong, POP_SIZE, ALNUM, VAR_STRING_LEN, VARIABLE_LEN, DOMAIN_MIN, DOMAIN_MAX, NUM_GENERATIONS,
     PROBABILITY_OF_MUTATION)
-
-dejong(dejong(-0.3200 ,-0.3200 ,0.0000 ,0.0000))
