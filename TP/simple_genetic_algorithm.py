@@ -3,19 +3,19 @@ import random
 from functions import general_decoder
 
 
-def initialize(num_strings: int, alnum_set: List[str], var_string_length) -> List[str]:
+def initialize(pop_size: int, alnum_set: List[str], var_string_length) -> List[str]:
     """
-    Generates num_strings of random strings with characters of their alphanumeric character set
+    Generates pop_size of random strings with characters of their alphanumeric character set
 
     Args:
-        num_strings (int): Number of strings to be generated 
+        pop_size (int): Number of strings to be generated 
         alnum_set (List[str]): Valid characters to genrate random string from
         var_string_length (int): Number of characters expected to be in each string
     Returns:
-        (List[str]): List of num_strings random strings made with characters of their alphanumeric character set
+        (List[str]): List of pop_size random strings made with characters of their alphanumeric character set
     """
 
-    return ["".join(random.choices(alnum_set, k=var_string_length)) for _ in range(num_strings)]
+    return ["".join(random.choices(alnum_set, k=var_string_length)) for _ in range(pop_size)]
 
 
 def perform_reproduction(population, inverse_fitness_func) -> List:
@@ -184,14 +184,14 @@ def print_table(strings, test_func, fitness_func, decoder_func):
 # program starts here:
 # -------------------------------------------------------------------------------------------------------------------------------------------
 #TODO docstring
-def SGA(test_function, num_strings, alnum_set, var_string_length, variable_length, domain_min, domain_max,
+def SGA(test_function, pop_size, alnum_set, var_string_length, variable_length, domain_min, domain_max,
         number_of_generations, probability_of_mutation):
     """
     Simple Genetic Algorithm that finds optimal 
 
     Args:
         test_function (<function>): Benchmark function that has known optimum values (global min)
-        num_strings (int): the number of strings to create
+        pop_size (int): the number of strings to create
         alnum_set (List[str]): Valid alphanumeric characters to genrate number system value-strings from 
         var_string_length (int): character length of string that contains one or more number system value-string string variables
         variable_length (int): character length of one number system value-string variable
@@ -204,9 +204,9 @@ def SGA(test_function, num_strings, alnum_set, var_string_length, variable_lengt
         table: generational performances, avoiding repeat max performance levels between contiguous generations
     """
     
-    #initialize a random population of num_strings values to be the starting point for optimization attempt
-    #returns string with (var_string_length * num_strings) number of characters
-    population = initialize(num_strings, alnum_set, var_string_length)
+    #initialize a random population of pop_size values to be the starting point for optimization attempt
+    #returns string with (var_string_length * pop_size) number of characters
+    population = initialize(pop_size, alnum_set, var_string_length)
 
     #small anonymous function used to find fitness measures of a member of a mating pool population, 
     #determined by the given benchmark test function
@@ -215,8 +215,8 @@ def SGA(test_function, num_strings, alnum_set, var_string_length, variable_lengt
 
     #print perfromance of poulation
     #header
-    print("\nTested population size: ", num_strings, " Number of generations: ", number_of_generations)
-    print("\n{:<20s}{:80s}{:<20s}".format("Generation", "Strongest Candidate", "Fitness"))
+    print("\nTested population size: ", pop_size, " Number of generations: ", number_of_generations)
+    print("\n{:<16s}{:80s}{:<20s}".format("Generation", "Strongest Candidate", "Fitness"))
     print("="*120)
 
     #TODO docstring
@@ -260,5 +260,5 @@ def SGA(test_function, num_strings, alnum_set, var_string_length, variable_lengt
             new_fit = False
             last_gen_repeat = i
     
-    print("="*100)
+    print("="*120)
     print("")
