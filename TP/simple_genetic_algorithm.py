@@ -49,6 +49,7 @@ def perform_reproduction(population, inverse_fitness_func) -> List:
     #sum up all found fitness measures 
     total_fitness = sum(fitnesses)
 
+    #TODO confirm docstring matches change to fitness measure
     #creates a list of each fitness measure's proportion to the sum of all found fitness measures of 
     #the mating pool
     #TODO noticed that probabilities_of_reproduction == fitnesses which I don't think seems proper
