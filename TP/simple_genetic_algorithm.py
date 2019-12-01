@@ -51,6 +51,7 @@ def perform_reproduction(population, inverse_fitness_func) -> List:
 
     #creates a list of each fitness measure's proportion to the sum of all found fitness measures of 
     #the mating pool
+    #TODO noticed that probabilities_of_reproduction == fitnesses which I don't think seems proper
     probabilities_of_reproduction = [fit / total_fitness for fit in fitnesses]
 
     #create list of randomly chosen strings that are weight biased 
@@ -191,7 +192,7 @@ def SGA(test_function, pop_size, alnum_set, var_string_length, variable_length, 
 
     Args:
         test_function (<function>): Benchmark function that has known optimum values (global min)
-        pop_size (int): the number of strings to create
+        pop_size (int): the number of strings to create for population
         alnum_set (List[str]): Valid alphanumeric characters to genrate number system value-strings from 
         var_string_length (int): character length of string that contains one or more number system value-string string variables
         variable_length (int): character length of one number system value-string variable
@@ -219,7 +220,6 @@ def SGA(test_function, pop_size, alnum_set, var_string_length, variable_length, 
     print("\n{:<16s}{:80s}{:<20s}".format("Generation", "Strongest Candidate", "Fitness"))
     print("="*120)
 
-    #TODO docstring
     #print off generational performances, avoiding repeat performance levels between contiguous generations
     last_fit_individual = fittest_individual = []
     last_max_fit = 0
