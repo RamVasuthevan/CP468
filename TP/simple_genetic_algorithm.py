@@ -217,7 +217,7 @@ def SGA(test_function, num_strings, alnum_set, var_string_length, variable_lengt
     #header
     print("\nTested population size: ", num_strings, " Number of generations: ", number_of_generations)
     print("\n{:<20s}{:80s}{:<20s}".format("Generation", "Strongest Candidate", "Fitness"))
-    print("="*100)
+    print("="*120)
 
     #TODO docstring
     #print off generational performances, avoiding repeat performance levels between contiguous generations
@@ -259,10 +259,6 @@ def SGA(test_function, num_strings, alnum_set, var_string_length, variable_lengt
         elif last_fit_individual == fittest_individual:
             new_fit = False
             last_gen_repeat = i
-
-        # #case: continued repeat of same fittest member between generations
-        # elif last_fit_individual == fittest_individual and not new_fit:
-        #     last_gen_repeat = i
     
     print("="*100)
     print("")
