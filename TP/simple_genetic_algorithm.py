@@ -2,6 +2,7 @@ from typing import List
 import random
 from functions import general_decoder
 
+LENGTH_OF_DECIMAL=4
 
 def initialize(pop_size: int, alnum_set: List[str], var_string_length) -> List[str]:
     """
@@ -218,7 +219,7 @@ def SGA(test_function, pop_size, alnum_set, var_string_length, variable_length, 
     #print perfromance of poulation
     #header
     print("\nTested population size: ", pop_size, " Number of generations: ", number_of_generations)
-    print("\n{:<16s}{:80s}{:<20s}".format("Generation", "Strongest Candidate", "Fitness"))
+    print("\n{:<16s}{:50}{:}".format("Generation", "Strongest Candidate", "Fitness"))
     print("="*120)
 
     #print off generational performances, avoiding repeat performance levels between contiguous generations
@@ -246,10 +247,10 @@ def SGA(test_function, pop_size, alnum_set, var_string_length, variable_length, 
         if not fittest_individual == last_fit_individual or i == (number_of_generations - 1):
             #case: if is the new fittest member after repeated max peformance
             if first_gen_repeat != last_gen_repeat or (i == (number_of_generations) and first_gen_repeat != last_gen_repeat):
-                print("\n\tFor generation {} to {}, the max performance level was {}.\n".format(first_gen_repeat, last_gen_repeat, last_max_fit))
+                print(("\n\tFor generation {} to {}, the max performance level was {:."+str(LENGTH_OF_DECIMAL)+"f}.\n").format(first_gen_repeat, last_gen_repeat, last_max_fit))
             
             
-            print("{:<10d} \t {} \t {} \t".format(i, fittest_individual, max_fitness))
+            print(("{:<10d} \t {} \t {:."+str(LENGTH_OF_DECIMAL)+"f} \t").format(i, " ".join([("{:."+str(LENGTH_OF_DECIMAL)+"f}").format(x) for x in fittest_individual]), max_fitness))
             #print("\n{:<20s}[{:80s}]{:<20s}".format(i, lamda m: str(for m in fittest_individual), max_fitness))
             last_fit_individual = fittest_individual
             last_max_fit = max_fitness
