@@ -145,7 +145,7 @@ def attempt_mutation(s, probability_of_mutation, alnum_set):
     else:
         return s
 
-
+#deprecated 
 def print_table(strings, test_func, fitness_func, decoder_func):
     """ 
     Pretty prints tested binary string mating pools and each string's reproduction performance stats
@@ -200,8 +200,8 @@ def SGA(test_function, num_strings, alnum_set, var_string_length, variable_lengt
         number_of_generations (int): number of times to mate / mutate the poulation in the attempt to hone in
                                         on the optimal input values for the given test_function
         probability_of_mutation (float):
-    Returns:
-        None
+    Prints:
+        table: generational performances, avoiding repeat max performance levels between contiguous generations
     """
     
     #initialize a random population of num_strings values to be the starting point for optimization attempt
@@ -213,31 +213,56 @@ def SGA(test_function, num_strings, alnum_set, var_string_length, variable_lengt
     inverse_fitness = lambda string: test_function(*general_decoder(string, variable_length, domain_min, domain_max, len(alnum_set)))
 
 
-    #print results
-    print("\nTested population size: ", num_strings, ", Number of generations: ", number_of_generations)
-    print("\nGeneration \t Strongest Candidate \t Fitness")
+    #print perfromance of poulation
+    #header
+    print("\nTested population size: ", num_strings, " Number of generations: ", number_of_generations)
+    print("\n{:<20s}{:80s}{:<20s}".format("Generation", "Strongest Candidate", "Fitness"))
     print("="*100)
 
     #TODO docstring
-    last_individual = []
+    #print off generational performances, avoiding repeat performance levels between contiguous generations
+    last_fit_individual = fittest_individual = []
+    last_max_fit = 0
+    new_fit = True
+    first_gen_repeat = last_gen_repeat = 0
     for i in range(number_of_generations):
+
+        #create new generation of population
         population = perform_reproduction(population, inverse_fitness)
         population = perform_mating(population)
         population = perform_mutations(population, probability_of_mutation, alnum_set)
 
+        #determine the max fitness measure of this generation
         max_fitness = max(1/(inverse_fitness(m)+1) for m in population)
         
-        #print perfromance of poulation
+        #determine the string variable values that have max_fitness of this generation
         for m in population:
             if 1/(inverse_fitness(m)+1) == max_fitness:
-                best_individual = general_decoder(m, variable_length, domain_min, domain_max, len(alnum_set))
+                fittest_individual = general_decoder(m, variable_length, domain_min, domain_max, len(alnum_set))
         
         #TODO docstring
-        if(len(last_individual)==0 or not last_individual == best_individual):
-            last_individual=best_individual
-            print("{:<10d} \t {} \t {} \t".format(i, best_individual, max_fitness))
-        elif(last_individual == best_individual):
-            print("Generation ", i, "no change")
+        #case: if this generation is more fit than its predecessor
+        if not fittest_individual == last_fit_individual or i == (number_of_generations - 1):
+            #case: if is the new fittest member after repeated max peformance
+            if first_gen_repeat != last_gen_repeat or (i == (number_of_generations) and first_gen_repeat != last_gen_repeat):
+                print("For generation {} to {}, the max performance level was {}.".format(first_gen_repeat, last_gen_repeat, last_max_fit))
+            
+            
+            print("{:<10d} \t {} \t {} \t".format(i, fittest_individual, max_fitness))
+            #print("\n{:<20s}[{:80s}]{:<20s}".format(i, lamda m: str(for m in fittest_individual), max_fitness))
+            last_fit_individual = fittest_individual
+            last_max_fit = max_fitness
+            first_gen_repeat = last_gen_repeat = i
+            new_fit = True
+
+        #case: first repeat of same fittest member between generations
+        elif last_fit_individual == fittest_individual:
+            new_fit = False
+            last_gen_repeat = i
+
+        # #case: continued repeat of same fittest member between generations
+        # elif last_fit_individual == fittest_individual and not new_fit:
+        #     last_gen_repeat = i
     
     print("="*100)
     print("")
