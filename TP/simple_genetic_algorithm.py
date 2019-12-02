@@ -141,7 +141,7 @@ def attempt_mutation(s, probability_of_mutation, alnum_set):
     #on average, method 2 seems to outperform method 1
     
     # #method 1
-    # #choose one bit randomly if random chance falls into the probabality that the string should mutate
+    # #choose one bit randomly if random chance falls into the probability  that the string should mutate
     # if random.random() < probability_of_mutation:
     #     bit_to_flip = random.randint(0, len(s) - 1)
     #     s = list(s)
@@ -151,7 +151,7 @@ def attempt_mutation(s, probability_of_mutation, alnum_set):
     #     return s
 
     #method 2
-    #bit by bit, perform mutation if random chance falls into the probabality that the bit should mutate
+    #bit by bit, perform mutation if random chance falls into the probability  that the bit should mutate
     for i in range(len(s)):
         if random.random() < probability_of_mutation:
             s = s[:i] + str(alnum_set[random.randint(0, len(alnum_set)-1)]) + s[i + 1:]        
