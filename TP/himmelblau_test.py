@@ -38,3 +38,5 @@ def himmelblau(*xs):
 print("Running Simple Genetic Algorithm on Himmelblau benchmark function")
 SGA(himmelblau, POP_SIZE, ALNUM, VAR_STRING_LEN, VARIABLE_LEN, DOMAIN_MIN, DOMAIN_MAX, NUM_GENERATIONS,
     PROBABILITY_OF_MUTATION)
+
+print("\nHimmelblau benchmark test complete\n")
