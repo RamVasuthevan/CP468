@@ -39,3 +39,5 @@ print("Running Simple Genetic Algorithm on Rosenbrock benchmark function")
 
 SGA(rosenbrock, POP_SIZE, ALNUM, VAR_STRING_LEN, VARIABLE_LEN, DOMAIN_MIN, DOMAIN_MAX, NUM_GENERATIONS,
     PROBABILITY_OF_MUTATION)
+
+print("\nRosenbrock benchmark test complete\n")
