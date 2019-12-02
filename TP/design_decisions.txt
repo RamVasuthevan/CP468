@@ -1,5 +1,9 @@
-The only data structure which we used were Python Lists. Lists are dynamic arrays that take O(n) time to initialize, O(1) time to update values and   O(1) amortized time to append to the end of the list (only used for the plot).
+The only data structure which we used were Python Lists. Lists are dynamic arrays that take O(n) time to initialize, O(1) time to update values and   
+O(1) amortized time to append to the end of the list (only used for the plot).
 
-As all lists are of fixed size, we could have used Numpy Arrays but we wanted to use vanilla Python as much as possible. The entire script is written in vanilla Python except for plotting.
+As all lists are of fixed size, we could have used Numpy Arrays but we wanted to use vanilla Python as much as possible. The entire script is 
+written in vanilla Python except for plotting.
 
-We used Python modules to make the code easier to follow. Each objective function is in its own module, along with constants that the SGA function uses. Functions.py contains several helper functions that are not directly part of the SGA. The SGA function itself calls a different function for each main step: Reproduction, crossover and mutation.
+We used Python modules to make the code easier to follow. Each objective function is in its own module, along with constants that the SGA function 
+uses. Functions.py contains several helper functions that are not directly part of the SGA. The SGA function itself calls a different function for 
+each main step: Reproduction, crossover and mutation.

@@ -1,3 +1,5 @@
+#functions.py
+
 def num_in_interval(lo, hi, value, needed_increments):
     """
     Maps (normalizes) the given value from the domain of (0, (number_system_base ^ number_of_digits_of_value))
