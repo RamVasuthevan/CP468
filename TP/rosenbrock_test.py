@@ -13,10 +13,18 @@ DOMAIN_MAX = 2
 
 def rosenbrock(*xs):
     """
-    Takes in x, y cartesian values and returns function output
+    The function is defined on n-dimensional space.
+    The function can be defined on any input domain but it is usually evaluated on
+    x_i element of [-5, 10] for i = 1, ..., n.
+    
+    Takes in n dimensional coordinates and returns output of: 
+        f(x,y) = sum[b(x_i + 1 - (x_i)^2)^2 + (a - x_i)^2]]
+    for i = 1, ..., n; and the parameters a and b are constants set to a = 1 and b = 100..
+
+    The function has one global minimum f(x^*) = 0 at x^* = (1, ..., 1).
 
     Args:
-        xs (List[num]): [x,y] x, y cartesian coordinates
+        xs (List[num]): n dimensional coordinates for Euclidean (n + 1)-space
     Returns:
         (float): f(x,y) = value closer to 0 indicates a coordinate closer to know global minimum
     """

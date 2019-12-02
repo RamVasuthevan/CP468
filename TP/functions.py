@@ -1,6 +1,6 @@
 def num_in_interval(lo, hi, value, needed_increments):
     """
-    Maps the given value from the domain of (0, (number_system_base ^ number_of_digits_of_value))
+    Maps (normalizes) the given value from the domain of (0, (number_system_base ^ number_of_digits_of_value))
     to a value in the operational domain that coincides to the incremental position that the given 
     value had in its original domain.
 
